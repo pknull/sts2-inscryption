@@ -1,0 +1,10 @@
+{
+  "INSCRYPTION-SQUIRREL.title": "Squirrel",
+  "INSCRYPTION-SQUIRREL.description": "Summon a {Power}/{Health} [gold]Squirrel[/gold].",
+  "INSCRYPTION-STOAT.title": "Stoat",
+  "INSCRYPTION-STOAT.description": "Sacrifice {Blood}.\nSummon a {Power}/{Health} [gold]Stoat[/gold].",
+  "INSCRYPTION-BULLFROG.title": "Bullfrog",
+  "INSCRYPTION-BULLFROG.description": "Sacrifice {Blood}.\nSummon a {Power}/{Health} [gold]Bullfrog[/gold].",
+  "INSCRYPTION-WOLF.title": "Wolf",
+  "INSCRYPTION-WOLF.description": "Sacrifice {Blood}.\nSummon a {Power}/{Health} [gold]Wolf[/gold]."
+}

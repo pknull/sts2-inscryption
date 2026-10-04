@@ -1,0 +1,16 @@
+{
+  "INSCRYPTION-INSCRYPTION.title": "The Challenger",
+  "INSCRYPTION-INSCRYPTION.titleObject": "the Challenger",
+  "INSCRYPTION-INSCRYPTION.description": "Sits across from the Spire as if it were a board.\nPlays [gold]creatures[/gold], pays in [red]Blood[/red] and [gold]Bones[/gold].",
+  "INSCRYPTION-INSCRYPTION.pronounObject": "them",
+  "INSCRYPTION-INSCRYPTION.possessiveAdjective": "their",
+  "INSCRYPTION-INSCRYPTION.pronounPossessive": "theirs",
+  "INSCRYPTION-INSCRYPTION.pronounSubject": "they",
+  "INSCRYPTION-INSCRYPTION.goldMonologue": "Teeth would be better.",
+  "INSCRYPTION-INSCRYPTION.eventDeathPrevention": "Not this hand.",
+  "INSCRYPTION-INSCRYPTION.aromaPrinciple": "[sine]...pine smoke... candle wax...[/sine]",
+  "INSCRYPTION-INSCRYPTION.cardsModifierTitle": "Challenger Cards",
+  "INSCRYPTION-INSCRYPTION.cardsModifierDescription": "The Challenger's creature cards will appear in rewards and shops.",
+  "INSCRYPTION-INSCRYPTION.banter.alive.endTurnPing": "Your move.",
+  "INSCRYPTION-INSCRYPTION.banter.dead.endTurnPing": "..."
+}

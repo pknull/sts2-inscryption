@@ -1,0 +1,18 @@
+.godot/
+bin/
+/android/
+.git/
+.idea/
+.vs/
+publish/
+Properties/
+packages/
+.editorconfig
+*.user
+Directory.Build.props
+# Generated art: track only the sources tools/make_art.py reads, plus the fal provenance manifest.
+assets/gen/*
+!assets/gen/fal_manifest.jsonl
+!assets/gen/stoat_flat_probe.png
+!assets/gen/*_flat.png
+!assets/gen/*_flat_cut.png
