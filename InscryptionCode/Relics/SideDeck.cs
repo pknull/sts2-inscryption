@@ -1,6 +1,8 @@
 using Inscryption.InscryptionCode.Cards;
 using Inscryption.InscryptionCode.Creatures;
 using Inscryption.InscryptionCode.Powers;
+using Inscryption.InscryptionCode.RestSite;
+using MegaCrit.Sts2.Core.Entities.RestSite;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -49,6 +51,16 @@ public sealed class SideDeck : InscryptionRelic
         Flash();
         var squirrel = Owner.Creature.CombatState.CreateCard<Squirrel>(Owner);
         await CardPileCmd.AddGeneratedCardToCombat(squirrel, PileType.Hand, Owner);
+    }
+
+    public override bool TryModifyRestSiteOptions(Player player, ICollection<RestSiteOption> options)
+    {
+        if (player != Owner)
+        {
+            return false;
+        }
+        options.Add(new CampfireRestSiteOption(player));
+        return true;
     }
 
     public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented, float deathAnimLength)

@@ -5,6 +5,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace Inscryption.InscryptionCode.Powers;
@@ -30,7 +31,8 @@ public sealed class CreaturePower : InscryptionPower
         {
             return target;
         }
-        return Board.Enemies(Owner.CombatState).IndexOf(dealer) == Board.LaneOf(Owner) ? Owner : target;
+        int lane = Board.LaneOf(Owner);
+        return lane >= 0 && Board.LaneOf(dealer) == lane ? Owner : target;
     }
 
     // The engine passes a redirected hit's overkill on to the original target (Osty's overflow reaches the
@@ -52,8 +54,25 @@ public sealed class CreaturePower : InscryptionPower
             return;
         }
         // In Inscryption an empty lane lets the hit through to the scale; with no scale here, it hits the first enemy.
-        int lane = Board.LaneOf(Owner);
-        Creature target = lane >= 0 && lane < enemies.Count ? enemies[lane] : enemies[0];
+        Creature target = Board.EnemyInLane(Owner.CombatState, Board.LaneOf(Owner)) ?? enemies[0];
+        Lunge();
+        VfxCmd.PlayOnCreatureCenter(target, "vfx/vfx_attack_slash");
         await CreatureCmd.Damage(choiceContext, target, creature.ScaledPower, ValueProp.Move, Owner);
+        // Pace the strikes so each creature's attack reads on its own, left to right.
+        await Cmd.Wait(0.25f);
+    }
+
+    /// <summary>A short hop toward the enemies; the art is a static image, so there is no attack animation.</summary>
+    private void Lunge()
+    {
+        var node = NCombatRoom.Instance?.GetCreatureNode(Owner);
+        if (node == null)
+        {
+            return;
+        }
+        float x = node.Position.X;
+        var tween = node.CreateTween();
+        tween.TweenProperty(node, "position:x", x + 40f, 0.08);
+        tween.TweenProperty(node, "position:x", x, 0.14);
     }
 }

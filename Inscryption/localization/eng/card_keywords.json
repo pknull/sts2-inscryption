@@ -1,3 +1,4 @@
 {
-  
+  "INSCRYPTION-CREATURE.title": "Creature",
+  "INSCRYPTION-CREATURE.description": "Takes a lane. Takes the hits of the enemy in its lane. At the end of your turn, strikes that enemy. If a lane has no creature, its enemy hits you."
 }

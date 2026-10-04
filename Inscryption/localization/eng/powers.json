@@ -1,7 +1,7 @@
 {
   "INSCRYPTION-CREATURE_POWER.title": "Creature",
-  "INSCRYPTION-CREATURE_POWER.description": "Takes attacks from the enemy in its lane. When you end your turn, strikes the enemy across its lane.",
-  "INSCRYPTION-CREATURE_POWER.smartDescription": "Takes attacks from the enemy in its lane. When you end your turn, strikes the enemy across its lane.",
+  "INSCRYPTION-CREATURE_POWER.description": "Takes the hits of the enemy in its lane. At the end of your turn, strikes that enemy (or the first enemy if its lane is empty).",
+  "INSCRYPTION-CREATURE_POWER.smartDescription": "Takes the hits of the enemy in its lane. At the end of your turn, strikes that enemy (or the first enemy if its lane is empty).",
   "INSCRYPTION-BONES_POWER.title": "Bones",
   "INSCRYPTION-BONES_POWER.description": "Gained whenever one of your creatures dies.",
   "INSCRYPTION-BONES_POWER.smartDescription": "You have [blue]{Amount}[/blue] Bones."

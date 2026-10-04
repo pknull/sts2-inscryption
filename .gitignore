@@ -16,3 +16,11 @@ assets/gen/*
 !assets/gen/stoat_flat_probe.png
 !assets/gen/*_flat.png
 !assets/gen/*_flat_cut.png
+!assets/gen/luke_body_v2.png
+!assets/gen/luke_body_v2_cut.png
+!assets/gen/luke_select_bg_v2.png
+!assets/gen/icon_*_cut.png
+!assets/gen/icon_bones.png
+!assets/gen/icon_paw.png
+!assets/gen/icon_side_deck.png
+!assets/gen/icon_campfire.png

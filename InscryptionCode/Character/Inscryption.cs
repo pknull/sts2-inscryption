@@ -4,6 +4,7 @@ using Inscryption.InscryptionCode.Extensions;
 using Godot;
 using MegaCrit.Sts2.Core.Entities.Characters;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes.Combat;
 using Inscryption.InscryptionCode.Cards;
 using Inscryption.InscryptionCode.Relics;
 
@@ -16,7 +17,7 @@ public class Inscryption : PlaceholderCharacterModel
     public static readonly Color Color = new("ffffff");
 
     public override Color NameColor => Color;
-    public override CharacterGender Gender => CharacterGender.Neutral;
+    public override CharacterGender Gender => CharacterGender.Masculine;
     public override int StartingHp => 70;
     
     // Provisional. Squirrels come from the SideDeck relic, not the deck.
@@ -55,8 +56,14 @@ public class Inscryption : PlaceholderCharacterModel
             return icon;
         }
     }
-    public override string CustomIconTexturePath => "character_icon_char_name.png".CharacterUiPath();
-    public override string CustomCharacterSelectIconPath => "char_select_char_name.png".CharacterUiPath();
-    public override string CustomCharacterSelectLockedIconPath => "char_select_char_name_locked.png".CharacterUiPath();
-    public override string CustomMapMarkerPath => "map_marker_char_name.png".CharacterUiPath();
+    public override string CustomIconTexturePath => "character_icon.png".CharacterUiPath();
+    public override string CustomCharacterSelectIconPath => "char_select_icon.png".CharacterUiPath();
+    public override string CustomCharacterSelectLockedIconPath => "char_select_icon_locked.png".CharacterUiPath();
+    public override string CustomMapMarkerPath => "map_marker.png".CharacterUiPath();
+
+    public override string CustomCharacterSelectBg => $"{MainFile.ResPath}/scenes/char_select_bg.tscn";
+
+    // A static image instead of the placeholder's Ironclad skeleton; rest site and merchant still use Ironclad's.
+    public override NCreatureVisuals? CreateCustomVisuals() =>
+        NodeFactory<NCreatureVisuals>.CreateFromResource("body.png".CharacterUiPath());
 }

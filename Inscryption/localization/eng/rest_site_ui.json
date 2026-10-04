@@ -1,0 +1,8 @@
+{
+  "OPTION_INSCRYPTION_CAMPFIRE.name": "Campfire",
+  "OPTION_INSCRYPTION_CAMPFIRE.descriptionPower": "Warm a creature card by the fire: it gains [gold]+1 Power[/gold] for the rest of the run.",
+  "OPTION_INSCRYPTION_CAMPFIRE.descriptionHealth": "Warm a creature card by the fire: it gains [gold]+2 Health[/gold] for the rest of the run.",
+  "OPTION_INSCRYPTION_CAMPFIRE.descriptionDisabled": "You have no creature cards to warm.",
+  "OPTION_INSCRYPTION_CAMPFIRE.promptPower": "Choose a creature to gain +1 Power.",
+  "OPTION_INSCRYPTION_CAMPFIRE.promptHealth": "Choose a creature to gain +2 Health."
+}
