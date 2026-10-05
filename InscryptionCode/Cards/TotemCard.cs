@@ -56,16 +56,11 @@ public abstract class TotemCard(Tribe tribe) : InscryptionCard(1, CardType.Power
             return;
         }
         Sigils.AddTotem(Owner.Creature.CombatState, tribe, (Sigil)_sigil);
-        // A Corpse Eater body must survive the end-of-turn discard to act, as printed Corpse Eaters Retain.
-        if ((Sigil)_sigil == Sigil.CorpseEater)
+        // A Corpse Eater must survive the end-of-turn discard to act, as printed Corpse Eaters Retain. Cards already
+        // in combat get Retain now; TotemPower gives it to the tribe's cards made later.
+        foreach (var card in Owner.PlayerCombatState?.AllCards.ToList() ?? [])
         {
-            foreach (var card in Owner.PlayerCombatState?.AllCards ?? [])
-            {
-                if (card is ICreatureCard creature && (creature.Stats.Tribe & tribe) != 0 && !card.Keywords.Contains(CardKeyword.Retain))
-                {
-                    card.AddKeyword(CardKeyword.Retain);
-                }
-            }
+            TotemPower.RetainIfCorpseEater(card);
         }
         await PowerCmd.Apply<TotemPower>(choiceContext, Owner.Creature, 1m, Owner.Creature, this);
         BoardLayout.Refresh();

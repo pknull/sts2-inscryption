@@ -450,8 +450,27 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   - The sacrifice grid built stand-in cards from the base card, so the Cat always read "9 lives" there. Stand-ins
     now copy the summoning card's campfire bonuses and lives (`ICreatureCard.CopyStateFrom`).
   - A Cat with no lives left kept Many Lives. `Sacrifice.Stays` now excludes it, so its next sacrifice kills it.
-- Not tested: a Totem carrying a batch-2 sigil; an upgraded Unkillable copy keeping its upgrade (code clones the
-  played card).
+- Not tested: an upgraded Unkillable copy keeping its upgrade (code clones the played card).
+
+### Totems carrying batch-2 sigils (2026-10-05, agent driving)
+- Fix first: Retain for Corpse Eater was stamped only on cards present when the Totem was played, so a Squirrel
+  made later (side deck, Unkillable copy) was discarded at end of turn. `TotemPower.AfterCardEnteredCombat` now
+  gives Retain to any card entering combat that has Corpse Eater (printed or from a Totem), the pattern of the
+  game's `PhantomBladesPower`.
+- Debug console command `totem <tribe> <sigil>` (`ConsoleCommands/TotemConsoleCmd.cs`, DebugOnly) puts a Totem with
+  a chosen sigil in the hand; the game finds console commands in mods by reflection. Needed because a Totem's
+  sigil is a seeded roll.
+- Verified, one Totem each: Worthy Sacrifice (Squirrel Totem: one Squirrel paid the Grizzly's 3 Blood); Many Lives
+  (Reptile Totem: the Geck's hover lists it; sacrificed, it stayed); Bone King (Canine Totem: sacrificed Coyote,
+  Bones 7 -> 11); Unkillable (Insect Totem: killed Mantis returned to hand); Corpse Eater (Squirrel Totem: the
+  Squirrel already in hand and one added afterwards both show Retain; the retained Squirrel played itself into
+  the killed Mantis's lane); Frozen Away (Hooved Totem: killed Pronghorn left an Opossum in lane 1). The grid
+  left out a Totem-Many-Lives Geck on a full board, as it should. No exceptions from the mod.
+- Harness: a session crashed on `fight` after `room shop` was jumped to from inside a fight with creatures out
+  (console only: creatures carried out of an unfinished combat). Steam twice stopped launching the game (cloud
+  sync waiting on a dialog while Steam was logged out); the Keeper cleared it. The driver now finds the game
+  window by name and sends no key unless the game window has focus; kills by index are made only after a
+  `damage 0 <i>` probe names the target.
 - Test-harness gotchas:
   - Steam Cloud sync undid the first save restore. At launch the game copies cloud -> local for any save whose
     local modified time differs from the cloud's (`CloudSaveStore.SyncCloudToLocalInternal`); a plain `cp`
