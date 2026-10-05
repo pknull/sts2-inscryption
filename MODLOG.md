@@ -491,6 +491,67 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   drives creature hover tips and the `totem` console command. Great White, Kingfisher and River Otter keep it.
   Totems already rolled keep their saved sigil.
 
+### Playtest 2026-10-05 (Keeper) and the defense question
+- Run 5T4W55CJ1H (standard, A0): died to the Decimillipede elite on floor 25. Damage per fight from the run
+  history: Act 1 boss Ceremonial Beast 0 over 12 turns; Nibbits, Fuzzy Wurm, Fogmog, Cubex, Bowlbugs weak,
+  Slumbering Beetle, The Obscura 0 each; Slithering Strangler 18; Slimes normal 14; Ruby Raiders 7; Vine
+  Shambler 6; Inklets 9; Exoskeletons weak 8; Mytes 10; Bowlbugs normal 21; Decimillipede 31 (death). Fights ran
+  3-12 turns. Zero exceptions across 385 card plays.
+- Keeper: whole-hit soaking is too cheap (a free Squirrel cancels any hit; single targets cost nothing), yet
+  groups hurt while lanes are open, and Luke has no defense but bodies. Biggest balance issue.
+- Change for testing (Keeper's call): `Balance.BlockersSoakOverkill = false`. A blocker soaks up to its HP and the
+  rest reaches Luke (the engine's Osty rule); the cap in `CreaturePower.ModifyHpLostAfterOsty` only applies when
+  the switch is on. Creature text says so. Still one Squirrel per turn (turn 1 included), by the Keeper's call.
+- Held until this is tested: Inscryption's scale as a power on Luke (absorbs damage that reaches him, half of
+  what his creatures dealt that turn; not Block, which the engine applies before a blocker and would pad the
+  blockers too). Not touched yet: fight length (offense, Power x3).
+- Also staged in this build, uncommitted until the Keeper has seen them: rest-site sprite without its own log
+  (bottom padded so his seat sits on BaseLib's 60% seat line; `luke_rest_nolog*.png`); buffed Power/Health shown
+  green (`{X:diff()}` against the printed stats via `CreatureCard.StatVar`); keyword, campfire and character
+  text translated out of Inscryption units (no Blood or Power wording; campfire shows +3 damage / +10 HP from
+  `Balance`); a log line per Burrower decision (the Keeper saw a Mole not cover a lane; no cause found yet).
+- Lane choice (Keeper's design): drag a creature card to a lane. First built as enemy targeting
+  (`TargetType.AnyEnemy`), but that left lanes without an enemy unchoosable, and position matters (Trifurcated
+  loses a strike on an edge lane; Leader, Bifurcated, Sprinter). Now cards stay untargeted; a Harmony prefix on
+  `NCardPlay.TryPlayCard` (mouse plays only) records where the card was let go, and `LaneDrop` maps it to the
+  nearest lane slot or lane-facing enemy across the screen. The summon goes there after the sacrifices (which may
+  free it), else the lowest empty lane; keyboard/controller plays take the lowest empty lane. Empty slots show a
+  dim lane number (`LaneMarkers.MarkEmptySlots`). Sacrifice-screen stand-ins say "In lane N" (a `Lane` var, 0 and
+  hidden elsewhere). Built to staging; deploys when the game next closes.
+
+### Second playtest and the standard kit (2026-10-05)
+- Run D9ZK9M0PPR (overkill pass-through live): hallway fights 0-12 HP each (37 over eight); died to the Waterfall
+  Giant (Act 1 boss) with 62 HP over 13 turns. Killed, the Giant stays, stuns itself ("About to Blow") and erupts
+  next turn for its stored Steam Eruption: vanilla characters Block it; Luke could only put a creature in its lane,
+  and everything above that creature's HP went through. No exceptions; no Mole played.
+- Keeper's call: give Luke a normal kit, like the other characters, and let creatures grow over the run, adding
+  cards that ease the StS mechanics even if they feel less Inscryption. Starting deck: 4 Strike (1 energy, 6
+  damage, +3 upgraded), 4 Defend (1 energy, 5 Block, +3), 2 Stoat; Squirrels still from the Side Deck. Strike and
+  Defend carry the Strike/Defend tags (Neow's Large Capsule and others look for them); Stoat stays Basic without a
+  tag; Wolf is now Common (reward pool). Overkill pass-through stays (Osty's rule); the Scale idea is dropped.
+- Art: `strike_flat.png` (a punch, mirrored to face right) and `defend_flat.png` (crossed forearms), fal edits with
+  the stoat probe for style and Luke's body for the hoodie (about $0.16); `make_art.basics()` writes portraits.
+- Found in the log: the game's enemy stats count Luke's creatures as opponents ("has died to a
+  MONSTER.INSCRYPTION-SQUIRREL_CREATURE. That's 5 losses", from `EnemyStats`). Harmless; not fixed yet.
+
+### Third playtest: Block order (2026-10-05)
+- Keeper: with Block up, an enemy's hit took his Block instead of hitting the creature in its lane. Cause, in
+  `CreatureCmd.Damage`: the target's Block (a pet's owner's, for pets) is spent before
+  `ModifyUnblockedDamageTarget` redirects, so Luke's Block shielded his blockers and was gone for open lanes.
+  Fix (`Creatures/Blocking.cs`): on an enemy's powered attack on Luke, `SideDeck.BeforeDamageReceived` picks the
+  blocker (creature in the attacker's lane if it can block, else a Burrower that digs in); a Harmony prefix on
+  `Creature.DamageBlockInternal` holds Luke's Block back for that hit; the creature takes it
+  (`CreaturePower.ModifyUnblockedDamageTarget`); the overkill then meets Luke's Block in
+  `SideDeck.ModifyHpLostAfterOsty`. Hits nobody can block use Luke's Block as normal. Built and deployed; not yet
+  seen in game.
+- Run J9FXFURTXH (standard kit, the Block bug live): died on floor 7 to the Phrog Parasite elite with 13 HP. HP
+  went to Neow (16, Precarious Shears), the cheese event (14) and Ruby Raiders (30 over 8 turns, despite about 16
+  Defends: the Block went to hits the creatures were blocking; the Tracker's Hounds hit 8 times a turn). Deck of
+  12 with 2 Strikes; fights ran 5-8 turns. The Cat reached nine sacrifices in natural play and became the Undead
+  Cat. Session log: no mod exceptions.
+- Also built this round: a lane highlight while dragging a creature card (empty slot number brightens; the
+  facing enemy and any occupant get the targeting reticle), from a per-frame tick during `NMouseCardPlay`.
+
 ### Gotchas found in game
 
 1. Mod-loading popup: choosing "load mods" saves `PlayerAgreedToModLoading` and calls `NGame.Quit()`

@@ -30,40 +30,16 @@ public sealed class CreaturePower : InscryptionPower
 
     private bool Has(Sigil sigil) => Sigils.Has(Owner, sigil);
 
-    /// <summary>Can this creature block the dealer's hit? Flyers pass over all but Mighty Leap; Waterborne submerges.</summary>
-    private bool CanBlock(Creature dealer) =>
-        !Has(Sigil.Waterborne) && (!Sigils.IsAirborneEnemy(dealer) || Has(Sigil.MightyLeap));
-
-    // Same mechanism as Osty's DieForYouPower, limited to the enemy in this creature's lane.
-    public override Creature ModifyUnblockedDamageTarget(Creature target, decimal amount, ValueProp props, Creature? dealer)
-    {
-        if (dealer == null || Owner.IsDead || !props.IsPoweredAttack() || !CanBlock(dealer))
-        {
-            return target;
-        }
-        if (Owner.PetOwner == null || target != Owner.PetOwner.Creature)
-        {
-            return target;
-        }
-        int lane = Board.LaneOf(Owner);
-        int dealerLane = Board.LaneOf(dealer);
-        if (lane >= 0 && dealerLane == lane)
-        {
-            return Owner;
-        }
-        // Burrower: digs into the empty lane being attacked and takes the hit.
-        if (Has(Sigil.Burrower) && Board.MoveTo(Owner, dealerLane))
-        {
-            return Owner;
-        }
-        return target;
-    }
+    // The creature Blocking chose for this hit (the one in the attacker's lane, or a Burrower) takes it. Same
+    // mechanism as Osty's DieForYouPower; Blocking holds the player's Block back until the creature has taken it.
+    public override Creature ModifyUnblockedDamageTarget(Creature target, decimal amount, ValueProp props, Creature? dealer) =>
+        Blocking.PendingBlocker(target) == Owner && Owner.IsAlive ? Owner : target;
 
     // The engine passes a redirected hit's overkill on to the original target (Osty's overflow reaches the
-    // Necrobinder). In Inscryption a blocker soaks the whole hit, so cap the loss at what this creature has left.
+    // Necrobinder). In Inscryption a blocker soaks the whole hit; Balance.BlockersSoakOverkill chooses which.
     public override decimal ModifyHpLostAfterOsty(Creature target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
     {
-        return target == Owner && Owner.IsAlive ? Math.Min(amount, Owner.CurrentHp) : amount;
+        return Balance.BlockersSoakOverkill && target == Owner && Owner.IsAlive ? Math.Min(amount, Owner.CurrentHp) : amount;
     }
 
     // Waterborne: submerged during the enemy turn, so nothing can hit it.

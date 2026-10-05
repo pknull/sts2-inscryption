@@ -26,4 +26,6 @@ assets/gen/*
 !assets/gen/icon_campfire.png
 !assets/gen/luke_rest.png
 !assets/gen/luke_rest_cut.png
+!assets/gen/luke_rest_nolog.png
+!assets/gen/luke_rest_nolog_cut.png
 !assets/gen/totem_*.png

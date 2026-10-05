@@ -9,6 +9,8 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace Inscryption.InscryptionCode.Relics;
 
@@ -64,4 +66,20 @@ public sealed class SideDeck : InscryptionRelic
 
     public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented, float deathAnimLength) =>
         Afterlife.AfterDeath(choiceContext, Owner, creature);
+
+    // Lane blocking: the creature in the attacker's lane takes the hit before Luke's Block does (see Blocking).
+    public override Task BeforeDamageReceived(PlayerChoiceContext choiceContext, Creature target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+        Blocking.BeforeHit(Owner, target, props, dealer);
+        return Task.CompletedTask;
+    }
+
+    public override decimal ModifyHpLostAfterOsty(Creature target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource) =>
+        target == Owner.Creature ? Blocking.AfterCreature(target, amount, props) : amount;
+
+    public override Task AfterDamageReceived(PlayerChoiceContext choiceContext, Creature target, DamageResult result, ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+        Blocking.Clear(target);
+        return Task.CompletedTask;
+    }
 }

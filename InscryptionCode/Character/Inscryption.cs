@@ -22,16 +22,16 @@ public class Inscryption : PlaceholderCharacterModel
     
     // Provisional. Squirrels come from the SideDeck relic, not the deck.
     public override IEnumerable<CardModel> StartingDeck => [
+        ModelDb.Card<Strike>(),
+        ModelDb.Card<Strike>(),
+        ModelDb.Card<Strike>(),
+        ModelDb.Card<Strike>(),
+        ModelDb.Card<Defend>(),
+        ModelDb.Card<Defend>(),
+        ModelDb.Card<Defend>(),
+        ModelDb.Card<Defend>(),
         ModelDb.Card<Stoat>(),
         ModelDb.Card<Stoat>(),
-        ModelDb.Card<Stoat>(),
-        ModelDb.Card<Stoat>(),
-        ModelDb.Card<Bullfrog>(),
-        ModelDb.Card<Bullfrog>(),
-        ModelDb.Card<Bullfrog>(),
-        ModelDb.Card<Wolf>(),
-        ModelDb.Card<Wolf>(),
-        ModelDb.Card<Wolf>()
     ];
 
     public override IReadOnlyList<RelicModel> StartingRelics =>

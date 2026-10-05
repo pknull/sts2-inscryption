@@ -87,6 +87,22 @@ def fit_square(img: Image.Image, size: int) -> Image.Image:
     return canvas
 
 
+# Rest site: Luke seated on nothing (the scene supplies the log). BaseLib draws a texture-only rest-site character
+# with the point 60% down the image on the scene's seat, so the bottom is padded until his seat sits there.
+REST_SEAT_ROW = 730  # underside of his hips in luke_rest_nolog_cut.png (1024 px source)
+REST_SEAT_LINE = 0.6
+
+
+def rest_site() -> Image.Image:
+    cutout = Image.open(GEN / "luke_rest_nolog_cut.png").convert("RGBA")
+    top = cutout.getchannel("A").getbbox()[1]
+    figure = sprite(ImageOps.mirror(cutout), 300)
+    seat = (REST_SEAT_ROW - top) * figure.height / (cutout.getchannel("A").getbbox()[3] - top)
+    canvas = Image.new("RGBA", (figure.width, round(seat / REST_SEAT_LINE)), (0, 0, 0, 0))
+    canvas.paste(figure, (0, 0), figure)
+    return canvas
+
+
 def character() -> None:
     """Luke Carder: combat body, character-select icons and splash, top-bar icon, map marker."""
     charui = IMAGES / "charui"
@@ -95,9 +111,9 @@ def character() -> None:
     cutout = ImageOps.mirror(Image.open(GEN / "luke_body_v2_cut.png").convert("RGBA"))
 
     sprite(cutout, 340).save(charui / "body.png")
-    # Shop (standing, larger) and rest site (sitting on a log, facing the fire on his right).
+    # Shop (standing, larger) and rest site (seated, facing the fire on his right).
     sprite(cutout, 460).save(charui / "merchant.png")
-    sprite(ImageOps.mirror(Image.open(GEN / "luke_rest_cut.png").convert("RGBA")), 300).save(charui / "rest_site.png")
+    rest_site().save(charui / "rest_site.png")
 
     # Select icons keep the flat background; crop from the head to the knees (132x195 aspect).
     select_box = (230, 90, 704, 790)
@@ -131,6 +147,20 @@ def outline(img: Image.Image, grow: int = 3) -> Image.Image:
 
 
 TOTEMS = ["canine", "hooved", "reptile", "avian", "insect", "squirrel"]
+
+
+# Luke's own Strike and Defend: card portraits only. The punch is drawn facing left; mirrored to face the enemies.
+BASICS = {"strike": ("strike_flat", True), "defend": ("defend_flat", False)}
+
+
+def basics() -> None:
+    for card, (source, mirror) in BASICS.items():
+        art = Image.open(GEN / f"{source}.png").convert("RGB")
+        if mirror:
+            art = ImageOps.mirror(art)
+        cover(art, (1000, 760)).save(IMAGES / "card_portraits" / "big" / f"{card}.png")
+        cover(art, (250, 190)).save(IMAGES / "card_portraits" / f"{card}.png")
+    print(f"basics: {len(BASICS)} portraits")
 
 
 def totems() -> None:
@@ -177,6 +207,7 @@ def main() -> None:
     character()
     icons()
     totems()
+    basics()
 
 
 if __name__ == "__main__":

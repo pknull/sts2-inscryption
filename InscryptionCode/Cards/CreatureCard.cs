@@ -38,9 +38,10 @@ public interface ICreatureCard
 }
 
 /// <summary>
-/// An Inscryption creature card. Playing it pays its Blood (sacrificing creatures already on the board, see
-/// <see cref="Sacrifice"/>) or its Bones, then summons <typeparamref name="TCreature"/> into the lowest empty lane.
-/// It costs no energy: Blood and
+/// An Inscryption creature card. It is dragged to a lane (<see cref="LaneDrop"/>): it pays its Blood (sacrificing
+/// creatures already on the board, see <see cref="Sacrifice"/>) or its Bones, then summons
+/// <typeparamref name="TCreature"/> into that lane, or the lowest empty lane if that one is taken. It costs no
+/// energy: Blood and
 /// Bones are the costs, as in Inscryption. Upgrading (Smith) lowers that cost by 1; the campfire raises the
 /// creature's stats for the run. Attackers (Power at least Health) are Attack cards; defenders and free creatures
 /// are Skills.
@@ -94,9 +95,24 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
     [
         new DynamicVar("Blood", stats.Blood),
         new DynamicVar("Bones", stats.Bones),
-        new DynamicVar("Power", Power),
-        new DynamicVar("Health", Health),
+        // Set only on the sacrifice screen's stand-in cards, so the text names the lane being given up.
+        new DynamicVar("Lane", 0),
+        new StatVar("Power", Power, stats.Power * Balance.PowerScale),
+        new StatVar("Health", Health, stats.Health * Balance.HealthScale),
     ];
+
+    /// <summary>
+    /// Power or Health, compared with the printed card when shown: the card text (<c>{Power:diff()}</c>) turns green
+    /// when campfires or Ouroboros have raised it, the way the game shows an upgraded value.
+    /// </summary>
+    private sealed class StatVar(string name, decimal value, decimal printed) : DynamicVar(name, value)
+    {
+        public override void UpdateCardPreview(CardModel card, CardPreviewMode previewMode, Creature? target, bool runGlobalHooks)
+        {
+            EnchantedValue = printed;
+            PreviewValue = BaseValue;
+        }
+    }
 
     // Corpse Eater acts from the hand, and creatures mostly die on the enemy's turn, after the hand is discarded; in
     // Inscryption the hand persists, so these cards Retain.
@@ -117,11 +133,11 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
     {
         if (buff == CampfireBuff.Power)
         {
-            Grow(1, 0);
+            Grow(Balance.CampfirePower, 0);
         }
         else
         {
-            Grow(0, 2);
+            Grow(0, Balance.CampfireHealth);
         }
     }
 
@@ -155,13 +171,15 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
             await Summoning.Summon<TCreature>(choiceContext, Owner, stats, _powerBonus, _healthBonus, this, lane);
             return;
         }
+        // The lane it was dropped on; sacrifices may free it.
+        int chosenLane = LaneDrop.Take(this);
         await Sacrifice.Perform(await ChooseSacrifices(choiceContext));
         if (Bones > 0)
         {
             await PowerCmd.Apply<BonesPower>(choiceContext, Owner.Creature, -Bones, Owner.Creature, this);
         }
         // Campfire bonuses live on the card; carry them onto this summon.
-        await Summoning.Summon<TCreature>(choiceContext, Owner, stats, _powerBonus, _healthBonus, this);
+        await Summoning.Summon<TCreature>(choiceContext, Owner, stats, _powerBonus, _healthBonus, this, chosenLane);
     }
 
     /// <summary>
@@ -201,14 +219,19 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
         return picked;
     }
 
-    /// <summary>The card shown for a creature on the sacrifice screen, carrying its summoning card's state.</summary>
-    private CardModel StandIn(ICombatState combatState, BoardCreature creature)
+    /// <summary>
+    /// The card shown for a creature on the sacrifice screen: it carries its summoning card's state and names its lane,
+    /// so two Stoats can be told apart.
+    /// </summary>
+    private CardModel StandIn(ICombatState combatState, Creature creature)
     {
-        var card = combatState.CreateCard(creature.Card, Owner);
-        if (creature.SourceCard != null && card is ICreatureCard standIn)
+        var board = (BoardCreature)creature.Monster!;
+        var card = combatState.CreateCard(board.Card, Owner);
+        if (board.SourceCard != null && card is ICreatureCard standIn)
         {
-            standIn.CopyStateFrom(creature.SourceCard);
+            standIn.CopyStateFrom(board.SourceCard);
         }
+        card.DynamicVars["Lane"].BaseValue = Board.LaneOf(creature) + 1;
         return card;
     }
 
@@ -221,7 +244,7 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
         {
             return [];
         }
-        var cards = creatures.Select(c => StandIn(combatState, (BoardCreature)c.Monster!)).ToList();
+        var cards = creatures.Select(c => StandIn(combatState, c)).ToList();
         try
         {
             var picked = await CardSelectCmd.FromSimpleGrid(choiceContext, cards, Owner,

@@ -32,7 +32,6 @@ internal static class BoardLayout
         {
             return;
         }
-        float start = ownerNode.Position.X + ownerNode.Visuals.Bounds.Size.X * 0.5f + Gap * 2;
         foreach (var creature in Board.Creatures(player))
         {
             var node = room.GetCreatureNode(creature);
@@ -52,14 +51,30 @@ internal static class BoardLayout
 
             // Each creature sits in its own lane's slot; empty lanes stay empty. Lanes 1 and 3 stand in front.
             int lane = Board.LaneOf(creature);
-            bool backRow = lane % 2 == 1;
-            float slotLeft = start + lane * (SlotWidth + Gap);
-            node.Position = new Vector2(slotLeft + SlotWidth * 0.5f, ownerNode.Position.Y + 10f - (backRow ? BackRowLift : 0f));
-            node.ZIndex = backRow ? 0 : 1;
+            node.Position = SlotLocal(ownerNode, lane);
+            node.ZIndex = lane % 2 == 1 ? 0 : 1;
             // Unlike ScaleTo (a temporary visual scale), this also resizes the hitbox, reticle and health bar.
             node.SetScaleAndHue(baseScale * fit, 0f);
             node.ToggleIsInteractable(true);
         }
+    }
+
+    /// <summary>
+    /// Where a creature in <paramref name="lane"/> stands (its feet), in the coordinates of the player's node's
+    /// parent. Lanes 2 and 4 stand back (up) so neighbouring health bars don't collide.
+    /// </summary>
+    public static Vector2 SlotLocal(NCreature ownerNode, int lane)
+    {
+        float start = ownerNode.Position.X + ownerNode.Visuals.Bounds.Size.X * 0.5f + Gap * 2;
+        float slotLeft = start + lane * (SlotWidth + Gap);
+        return new Vector2(slotLeft + SlotWidth * 0.5f, ownerNode.Position.Y + 10f - (lane % 2 == 1 ? BackRowLift : 0f));
+    }
+
+    /// <summary>The same point in canvas coordinates, to compare with the mouse; null if the player has no node.</summary>
+    public static Vector2? SlotGlobal(NCombatRoom room, Player player, int lane)
+    {
+        var ownerNode = room.GetCreatureNode(player.Creature);
+        return ownerNode?.GetParent() is CanvasItem parent ? parent.GetGlobalTransform() * SlotLocal(ownerNode, lane) : null;
     }
 
     /// <summary>Re-run the layout, lane badges and attack intents (Leader changes neighbours' power).</summary>

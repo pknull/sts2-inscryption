@@ -19,4 +19,16 @@ public static class Balance
 
     /// <summary>Squirrels in the side deck per combat.</summary>
     public const int SideDeckSize = 10;
+
+    /// <summary>
+    /// Does a blocker soak the whole hit (Inscryption), or only up to its HP with the rest reaching the player (the
+    /// engine's own rule, as Osty's overflow reaches the Necrobinder)? Whole-hit soaking let a free Squirrel cancel any
+    /// hit; off for testing (Keeper, 2026-10-05).
+    /// </summary>
+    public const bool BlockersSoakOverkill = false;
+
+    /// <summary>Inscryption's campfire warms a creature for +1 Power or +2 Health (before scaling).</summary>
+    public const int CampfirePower = 1;
+
+    public const int CampfireHealth = 2;
 }
