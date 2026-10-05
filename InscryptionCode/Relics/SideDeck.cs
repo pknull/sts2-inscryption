@@ -39,6 +39,7 @@ public sealed class SideDeck : InscryptionRelic
     public override Task BeforeCombatStart()
     {
         SquirrelsLeft = Balance.SideDeckSize;
+        HitLog.Reset();
         return Task.CompletedTask;
     }
 
@@ -71,6 +72,7 @@ public sealed class SideDeck : InscryptionRelic
     public override Task BeforeDamageReceived(PlayerChoiceContext choiceContext, Creature target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
     {
         Blocking.BeforeHit(Owner, target, props, dealer);
+        HitLog.Before(Owner, target, amount, props, dealer);
         return Task.CompletedTask;
     }
 
@@ -80,6 +82,13 @@ public sealed class SideDeck : InscryptionRelic
     public override Task AfterDamageReceived(PlayerChoiceContext choiceContext, Creature target, DamageResult result, ValueProp props, Creature? dealer, CardModel? cardSource)
     {
         Blocking.Clear(target);
+        return Task.CompletedTask;
+    }
+
+    // Reported for every result, killed targets included (AfterDamageReceived skips those).
+    public override Task AfterDamageGiven(PlayerChoiceContext choiceContext, Creature? dealer, DamageResult result, ValueProp props, Creature target, CardModel? cardSource)
+    {
+        HitLog.After(result);
         return Task.CompletedTask;
     }
 }

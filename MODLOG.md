@@ -552,6 +552,24 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
 - Also built this round: a lane highlight while dragging a creature card (empty slot number brightens; the
   facing enemy and any occupant get the targeting reticle), from a per-frame tick during `NMouseCardPlay`.
 
+### Fourth playtest: the damage curve (2026-10-05)
+- Run 9RW2WGXP9W (all fixes live): died on floor 28 (Act 2) to the Infested Prisms elite, 53 HP in 5 turns.
+  Per fight: 15 of 20 cost 0-1 HP; Inklets 9, Bygone Effigy (elite) 8, Chompers 16; The Kin (Act 1 boss) 32 over
+  12 turns. Hallway fights ran 2-4 turns. Deck of 30 (two Great Whites, Grizzly, Amalgam, Ouroboros, 4 Strike,
+  4 Defend). No mod exceptions; no Burrower lines (no Mole played).
+- Keeper: the damage distribution still feels odd. Reading: creature HP is fixed (Health x5) while enemy hits
+  grow by act and within a fight (Prism Jab 15 plus Pulsate buffs; the Kin Priest's Weak and Frail). A hit below
+  the blocker's HP costs nothing; above it, the overkill lands in full, so damage switches from none to lethal
+  instead of ramping. The run history records HP lost per fight, not per hit, so it cannot tell blockers too
+  small from a Block-order misfire in the elite.
+- Added `Creatures/HitLog.cs`: a godot.log line per hit on Luke or his creatures, e.g. `Hit (turn 3):
+  INFESTED_PRISM in lane 1, 15 damage; SQUIRREL_CREATURE took 5 of its 5 HP, died; Luke: Block 6 -> 0, HP 53 ->
+  49`, or why nobody blocked (lane empty, occupant could not block). Fed from `SideDeck.BeforeDamageReceived`
+  (after `Blocking` picks the blocker) and `AfterDamageGiven` (unlike `AfterDamageReceived`, it also reports
+  killed targets). Built and deployed; not yet seen in game.
+- Levers once a run has the log: creature HP that grows by act, or cheaper ways to buy creature HP; a Block-order
+  fix instead if the split points there.
+
 ### Gotchas found in game
 
 1. Mod-loading popup: choosing "load mods" saves `PlayerAgreedToModLoading` and calls `NGame.Quit()`
@@ -570,6 +588,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
 
 ## Next
 
-- Verify in game: mod list shows Inscryption + BaseLib; character selectable; Squirrel arrives turn 1;
-  Squirrel -> sacrifice for Stoat; Stoat attacks at turn end; enemy in lane 0 hits the Stoat;
-  Bones +1 on sacrifice. Evidence: `~/.local/share/SlayTheSpire2/logs/godot.log` + screenshots.
+- Play a run with `HitLog` live and split each elite and boss fight's damage: blocker HP, Luke's Block, open lanes.
+- Then a lever for Act 2 hits (creature HP by act, or cheaper creature HP); offense if fights drag.
+- Enemy stats count Luke's creatures as opponents (harmless, unfixed).
+- Inscryption-flavoured non-creature cards; sigil batch 3; field note via `um kb` (Keeper's OK before a PR).
