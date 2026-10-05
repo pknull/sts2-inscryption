@@ -38,7 +38,7 @@ public sealed class TotemConsoleCmd : AbstractConsoleCmd
         }
         if (!TryParseEnum<Sigil>(args[1], out var sigil) || sigil == Sigil.None)
         {
-            return new CmdResult(success: false, "Unknown sigil '" + args[1] + "'. Sigils: " + string.Join(", ", Sigils.Modular));
+            return new CmdResult(success: false, "Unknown sigil '" + args[1] + "'. Sigils: " + string.Join(", ", Sigils.Implemented));
         }
         CardModel canonical = tribe switch
         {
@@ -62,7 +62,7 @@ public sealed class TotemConsoleCmd : AbstractConsoleCmd
         }
         if (args.Length == 2)
         {
-            return CompleteArgument(Sigils.Modular.Select(s => s.ToString().ToLowerInvariant()), [args[0]], args[1]);
+            return CompleteArgument(Sigils.Implemented.Select(s => s.ToString().ToLowerInvariant()), [args[0]], args[1]);
         }
         return new CompletionResult { Type = CompletionType.Argument, ArgumentContext = CmdName };
     }

@@ -483,6 +483,14 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
     the indexes landed on the enemies, the fight was won, and the run saved again. Do not kill by index in
     loops; test sacrifices with multi-Blood cards on a full board instead, and check the log after each step.
 
+### Waterborne out of the Totem pool (2026-10-05, Keeper's call)
+- Waterborne played poorly on a Totem. In Inscryption it was rated 1 (lowest) on the wiki's sigil table and
+  worked as a racing piece: a submerged creature's lane hits the scale, its own strikes win the weight back, and
+  nothing carries between fights. Here every hit through it is lasting HP, and a Totem opens a whole tribe's
+  lanes. `Sigils.Modular` (the Totem roll pool) now leaves out Waterborne; `Sigils.Implemented` (every sigil)
+  drives creature hover tips and the `totem` console command. Great White, Kingfisher and River Otter keep it.
+  Totems already rolled keep their saved sigil.
+
 ### Gotchas found in game
 
 1. Mod-loading popup: choosing "load mods" saves `PlayerAgreedToModLoading` and calls `NGame.Quit()`

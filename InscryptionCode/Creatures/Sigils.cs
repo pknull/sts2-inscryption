@@ -47,8 +47,15 @@ public enum Tribe
 
 public static class Sigils
 {
-    /// <summary>Sigils a Totem can carry (Inscryption's "modular" sigils; all implemented ones qualify).</summary>
-    public static readonly Sigil[] Modular = Enum.GetValues<Sigil>().Where(s => s != Sigil.None).ToArray();
+    /// <summary>Every implemented sigil.</summary>
+    public static readonly Sigil[] Implemented = Enum.GetValues<Sigil>().Where(s => s != Sigil.None).ToArray();
+
+    /// <summary>
+    /// Sigils a Totem can roll. Not Waterborne: in Inscryption a submerged creature's lane hits the scale, a race the
+    /// creature's own strikes win back; here every hit through it is lasting HP, and a Totem would open a whole
+    /// tribe's lanes (Keeper, 2026-10-05). Waterborne stays on the creatures built for it.
+    /// </summary>
+    public static readonly Sigil[] Modular = Implemented.Where(s => s != Sigil.Waterborne).ToArray();
 
     public static readonly Tribe[] Tribes = [Tribe.Canine, Tribe.Hooved, Tribe.Reptile, Tribe.Avian, Tribe.Insect, Tribe.Squirrel];
 
@@ -142,7 +149,7 @@ public static class Sigils
         combatState != null && Totems.TryGetValue(combatState, out var totems)
         && totems.Any(t => t.Sigil == sigil && (tribe & t.Tribe) != 0);
 
-    public static IEnumerable<Sigil> All(Creature creature) => Modular.Where(s => Has(creature, s));
+    public static IEnumerable<Sigil> All(Creature creature) => Implemented.Where(s => Has(creature, s));
 
     /// <summary>The lanes a creature strikes: its own, or its neighbours (Bifurcated), or all three (Trifurcated).</summary>
     public static IEnumerable<int> StrikeLanes(Creature creature)
