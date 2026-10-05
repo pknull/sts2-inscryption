@@ -20,6 +20,11 @@ internal static class BoardLayout
     public const float SlotHeight = 110f;
     private const float Gap = 10f;
 
+    /// <summary>Lanes 2 and 4 stand this far back (up), so neighbouring health bars and statuses don't collide.</summary>
+    public const float BackRowLift = 40f;
+
+    private const string BaseScale = "inscryption_base_scale";
+
     private static void Arrange(NCombatRoom room, Player player)
     {
         var ownerNode = room.GetCreatureNode(player.Creature);
@@ -35,13 +40,24 @@ internal static class BoardLayout
             {
                 continue;
             }
-            float width = node.Visuals.Bounds.Size.X * node.Visuals.DefaultScale;
-            float height = node.Visuals.Bounds.Size.Y * node.Visuals.DefaultScale;
-            float scale = Mathf.Min(1f, Mathf.Min(SlotWidth / width, SlotHeight / height));
-            // Each creature sits in its own lane's slot; empty lanes stay empty.
-            float slotLeft = start + Board.LaneOf(creature) * (SlotWidth + Gap);
-            node.Position = new Vector2(slotLeft + SlotWidth * 0.5f, ownerNode.Position.Y + 10f);
-            node.ScaleTo(scale, 0.2);
+            // SetScaleAndHue overwrites DefaultScale, so fit from the scale the creature arrived with.
+            if (!node.HasMeta(BaseScale))
+            {
+                node.SetMeta(BaseScale, node.Visuals.DefaultScale);
+            }
+            float baseScale = node.GetMeta(BaseScale).AsSingle();
+            float width = node.Visuals.Bounds.Size.X * baseScale;
+            float height = node.Visuals.Bounds.Size.Y * baseScale;
+            float fit = Mathf.Min(1f, Mathf.Min(SlotWidth / width, SlotHeight / height));
+
+            // Each creature sits in its own lane's slot; empty lanes stay empty. Lanes 1 and 3 stand in front.
+            int lane = Board.LaneOf(creature);
+            bool backRow = lane % 2 == 1;
+            float slotLeft = start + lane * (SlotWidth + Gap);
+            node.Position = new Vector2(slotLeft + SlotWidth * 0.5f, ownerNode.Position.Y + 10f - (backRow ? BackRowLift : 0f));
+            node.ZIndex = backRow ? 0 : 1;
+            // Unlike ScaleTo (a temporary visual scale), this also resizes the hitbox, reticle and health bar.
+            node.SetScaleAndHue(baseScale * fit, 0f);
             node.ToggleIsInteractable(true);
         }
     }

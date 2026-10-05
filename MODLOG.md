@@ -274,6 +274,35 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   non-Basic pool lacks (Power, for now) falls back to Skill. Power Potion with no Powers shows an empty choice.
   Staged; verification pending.
 
+### Stagger and true scale (2026-10-04, floor 15)
+- Verified on screen: four fixed slots with lane badges 1-4; Opossum (Bones card) summoned; Rattler card
+  shows the Attack frame.
+- FAIL: creature health bars and status rows overlapped. Cause: `NCreature.ScaleTo` is a temporary visual
+  scale (`DoScaleTween` sets only `Visuals.Scale`); hitbox, reticle, intent position and health bar come
+  from `UpdateBounds`, which ScaleTo never calls and which divides out `_tempScale`. Fix: public
+  `SetScaleAndHue(scale, 0)` (sets DefaultScale + Scale and calls UpdateBounds; hue 0 leaves materials).
+  Because it overwrites DefaultScale, each node's arrival scale is kept in meta `inscryption_base_scale`.
+  Keeper's stagger: lanes 2 and 4 stand 40 px back (up) with ZIndex 0; lanes 1 and 3 in front (ZIndex 1).
+
+### Agent-driven verification (2026-10-04, Keeper away and authorized driving the game)
+- Method: xdotool on the game window (2560x1440), dev console (` key) for `room shop|restsite|monster`,
+  `godmode`, `card <ID>`; screenshots via `import -window`. Console-jumped rooms are NOT saved
+  (`RunManager.EnterRoomDebug`; save file unchanged by Save and Quit), so tests left the Keeper's run as it
+  was: Continue returns to the post-Thieving-Hopper loot (deck 27, 159 gold, floor 19). Modded saves backed
+  up first (`~/.universal-modder/backups/sts2-modded-saves/`). Gotcha: typing while the console is closed
+  sends hotkeys to the game (opened the deck view, toggled View Upgrades); open the console, screenshot to
+  confirm, then type.
+- Verified: card reward with rares and an upgraded Rattler+ ("Spend 5 Bones"); Creature keyword and its
+  tooltip; Attack/Skill frames; shop opens (Opossum, Rattler as Attacks; River Snapper, Bullfrog as Skills;
+  Geck fills the Power slot); Campfire option, icon, Health description, creature-only grid, prompt, card
+  updates to 3/25, rest consumed; campfire persistence across reload (Keeper's River Snapper Power +1 is in
+  the save and reloads as "6/30"); Urayuli+ "Sacrifice 3" (Smith); four lanes staggered with readable HP bars
+  and statuses; sacrifice grid ("Choose 1 creature to sacrifice", lane order); the summon takes the freed
+  lane; lanes stay put when a creature dies; strikes (empty-lane Geck hits enemy 1, Stoat hits enemy 2);
+  blocking with overkill cap (15-damage hit shows 5 on a 5-HP Squirrel); Bones +1 per death; Opossum spends
+  2 Bones, takes empty lane 1, Bones power removed at 0; hover reticle (enemy 1 brackets the lane-1 creature).
+- Not visually confirmed: the strike lunge tween (frames caught the death, not the hop).
+
 ### Gotchas found in game
 
 1. Mod-loading popup: choosing "load mods" saves `PlayerAgreedToModLoading` and calls `NGame.Quit()`
