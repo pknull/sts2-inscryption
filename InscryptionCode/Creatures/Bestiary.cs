@@ -2,10 +2,12 @@ namespace Inscryption.InscryptionCode.Creatures;
 
 /// <summary>
 /// Inscryption's printed stats for a creature card, before <see cref="Balance.PowerScale"/> and
-/// <see cref="Balance.HealthScale"/>. A card costs Blood or Bones (or nothing), as in Inscryption.
+/// <see cref="Balance.HealthScale"/>. A card costs Blood or Bones (or nothing), as in Inscryption. Terrain holds a
+/// lane but cannot be sacrificed.
 /// </summary>
 public sealed record CreatureStats(
-    int Blood, int Power, int Health, int Bones = 0, Tribe Tribe = Tribe.None, Sigil[]? SigilList = null)
+    int Blood, int Power, int Health, int Bones = 0, Tribe Tribe = Tribe.None, Sigil[]? SigilList = null,
+    bool Terrain = false)
 {
     public bool IsFree => Blood == 0 && Bones == 0;
 
@@ -67,4 +69,19 @@ public static class Bestiary
     public static readonly CreatureStats Mole = new(Blood: 1, Power: 0, Health: 4, SigilList: [Sigil.Burrower]);
     public static readonly CreatureStats MoleMan = new(Blood: 1, Power: 0, Health: 6,
         SigilList: [Sigil.Burrower, Sigil.MightyLeap]);
+
+    // Batch 2: sacrifice and death sigils.
+    public static readonly CreatureStats BlackGoat = new(Blood: 1, Power: 0, Health: 1, Tribe: Tribe.Hooved,
+        SigilList: [Sigil.WorthySacrifice]);
+    public static readonly CreatureStats Cat = new(Blood: 1, Power: 0, Health: 1, SigilList: [Sigil.ManyLives]);
+    public static readonly CreatureStats UndeadCat = new(Blood: 1, Power: 3, Health: 6);
+    public static readonly CreatureStats Cockroach = new(Blood: 0, Power: 1, Health: 1, Bones: 4, Tribe: Tribe.Insect,
+        SigilList: [Sigil.Unkillable]);
+    public static readonly CreatureStats CorpseMaggots = new(Blood: 0, Power: 1, Health: 2, Bones: 5,
+        Tribe: Tribe.Insect, SigilList: [Sigil.CorpseEater]);
+    public static readonly CreatureStats RatKing = new(Blood: 2, Power: 2, Health: 1, SigilList: [Sigil.BoneKing]);
+    public static readonly CreatureStats Ouroboros = new(Blood: 2, Power: 1, Health: 1, Tribe: Tribe.Reptile,
+        SigilList: [Sigil.Unkillable]);
+    public static readonly CreatureStats FrozenOpossum = new(Blood: 0, Power: 0, Health: 5,
+        SigilList: [Sigil.FrozenAway], Terrain: true);
 }

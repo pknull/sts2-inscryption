@@ -38,5 +38,19 @@
   "INSCRYPTION-GUARDIAN.title": "Guardian",
   "INSCRYPTION-GUARDIAN.description": "At the start of the enemy turn, if its lane's enemy isn't attacking, it moves to block an attacker in an empty lane.",
   "INSCRYPTION-SPRINTER.title": "Sprinter",
-  "INSCRYPTION-SPRINTER.description": "After it strikes, it moves one lane, turning back at the edge or when blocked."
+  "INSCRYPTION-SPRINTER.description": "After it strikes, it moves one lane, turning back at the edge or when blocked.",
+  "INSCRYPTION-MANYLIVES.title": "Many Lives",
+  "INSCRYPTION-MANYLIVES.description": "Sacrificing it pays its Blood, but it stays on the board.",
+  "INSCRYPTION-WORTHYSACRIFICE.title": "Worthy Sacrifice",
+  "INSCRYPTION-WORTHYSACRIFICE.description": "Worth 3 Blood when sacrificed.",
+  "INSCRYPTION-BONEKING.title": "Bone King",
+  "INSCRYPTION-BONEKING.description": "When it dies, gain 4 [gold]Bones[/gold] instead of 1.",
+  "INSCRYPTION-UNKILLABLE.title": "Unkillable",
+  "INSCRYPTION-UNKILLABLE.description": "When it dies, a copy of its card returns to your hand.",
+  "INSCRYPTION-CORPSEEATER.title": "Corpse Eater",
+  "INSCRYPTION-CORPSEEATER.description": "While in your hand (it Retains): when one of your creatures is killed (not sacrificed), this is summoned into its lane for free.",
+  "INSCRYPTION-FROZENAWAY.title": "Frozen Away",
+  "INSCRYPTION-FROZENAWAY.description": "When it is killed, the [gold]Opossum[/gold] frozen inside takes its lane.",
+  "INSCRYPTION-TERRAIN.title": "Terrain",
+  "INSCRYPTION-TERRAIN.description": "Holds a lane. Cannot be sacrificed."
 }

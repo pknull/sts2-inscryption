@@ -23,6 +23,9 @@ public abstract class BoardCreature : CustomMonsterModel
     /// <summary>Inscryption Power from campfires, copied from the card at summon (combat only).</summary>
     public int BonusPower { get; set; }
 
+    /// <summary>The card instance that summoned it, if any; Unkillable returns a copy of it.</summary>
+    public CardModel? SourceCard { get; set; }
+
     /// <summary>The sigils printed on the card that summoned it (Totem sigils are added by <see cref="Sigils.Has"/>).</summary>
     public HashSet<Sigil> OwnSigils { get; } = [];
 

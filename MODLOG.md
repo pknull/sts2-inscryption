@@ -395,6 +395,74 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
     back up and restore.
   - The console only opens when the game window has focus: `xdotool windowactivate --sync` first, and check
     the console overlay is up before typing (otherwise letters are hotkeys; "E" ends the turn).
+- Keeper approved restoring the pre-fight save. The first restore (plain copy) did NOT hold: see the save-sync
+  gotcha under batch 2.
+
+### Sigils, batch 2 of 3: sacrifice and death (2026-10-04)
+
+- Sigils: Many Lives (a sacrifice that pays and stays; no death, so no Bones), Worthy Sacrifice (worth 3 Blood),
+  Bone King (4 Bones on death instead of 1), Unkillable (on any death, sacrifice included, a copy of the
+  summoning card returns to the hand: `CardModel.CreateClone` of the played card, so campfire bonuses and the
+  Smith upgrade carry over), Corpse Eater (in hand: when a creature is killed, not sacrificed, the card is
+  auto-played free into that lane), Frozen Away (killed, not sacrificed: an Opossum takes the lane; a Totem's
+  Frozen Away also releases an Opossum). New card property Terrain: holds a lane, cannot be sacrificed (unless
+  Worthy Sacrifice), shown as a keyword.
+- Creatures: Black Goat 1Bl 0/1 Hooved Worthy Sacrifice (C); Cat 1Bl 0/1 Many Lives (C); Cockroach 4Bo 1/1 Insect
+  Unkillable (C); Rat King 2Bl 2/1 Bone King (C); Corpse Maggots 5Bo 1/2 Insect Corpse Eater (U); Frozen Opossum
+  free 0/5 Terrain Frozen Away (U; Inscryption's bottle item made a card); Ouroboros 2Bl 1/1 Reptile Unkillable
+  (R); Undead Cat 1Bl 3/6 (Token, never offered).
+- Cat: nine lives. Each sacrifice counts on the combat card (its text shows lives left) and on the deck card
+  (`DeckVersion`, `[SavedProperty] Inscryption_LivesLost`); the ninth turns the deck card into the Undead Cat
+  (`CardCmd.TransformTo`). Ouroboros: each death grows every Ouroboros +1/+1 for the run (deck cards, combat
+  copies, and any on the board), then Unkillable returns the grown copy.
+- Engine: `Sacrifice` (Blood values, Many Lives, what can still be paid with a lane left for the summon),
+  `Summoning` (one summon path for cards, Corpse Eater and Frozen Away), `Afterlife` (called from
+  `SideDeck.AfterDeath`: Bones, Ouroboros, Unkillable, then Frozen Away or Corpse Eater). Sacrificed creatures
+  are marked so "killed" sigils skip them. When every candidate is worth 1 Blood and any pick leaves a lane, the
+  old exact-count grid stays; otherwise the player picks one creature at a time ("Blood still owed") and only
+  picks that can still finish with a free lane are offered. `ICreatureCard` gains `Stats`, `Grow`,
+  `PlayFreeInto`; `Sigils.CardHas` checks a card's sigils (printed or Totem) for Corpse Eater in hand.
+- Art: 8 fal edits + cutouts (about $0.70), same prompt template off `stoat_flat_probe.png`.
+- Build: Godot's headless export needs `DOTNET_ROOT=~/.dotnet` (and `DOTNET_ROLL_FORWARD=Major`); without it the
+  export crashed and its crash handler raised a zenity alert on the desktop. Run exports with
+  `env -u DISPLAY -u WAYLAND_DISPLAY` so a failure stays in the log.
+
+### Batch 2 verified in game (2026-10-04, agent driving; Nibbits normal fights)
+- Worthy Sacrifice: with only the Black Goat on the board the 3-Blood Grizzly was playable, and the Goat alone
+  paid for it.
+- Many Lives: the Cat paid and stayed (card text 9 -> 8 lives); no Bone for it. With the Cat on a full board the
+  one-at-a-time picker ran ("2 Blood still owed", then "1 Blood still owed") and the Cat was not offered twice.
+- Unkillable: a sacrificed Cockroach and a killed Ouroboros each returned to the hand.
+- Bone King: the Rat King's death took Bones 13 -> 17 (Luke's power tooltip).
+- Corpse Eater: killing the Rat King auto-played the Maggots free into its lane; sacrifices with Maggots in hand
+  did nothing; on the enemy turn, after the hand was discarded, the Nibbit's hit killed the Cat and the
+  retained Maggots took lane 1.
+- Frozen Away: killing the Frozen Opossum put an Opossum (3/5) in its lane, ahead of the Maggots in hand.
+  Terrain: the Frozen Opossum was never offered as a sacrifice.
+- Ouroboros: its death grew the hand copy to 6/10, and the deck card (added with `card ... Deck`) to 6/10.
+- Cat: nine sacrifices of the deck Cat turned the deck card into the Undead Cat (9/30; deck count unchanged).
+  A combat-only Cat sacrificed nine times showed "0 lives left" and its tenth sacrifice killed it.
+- Zero exceptions in the log across three sessions.
+- Fixed during the test, re-verified:
+  - Corpse Eater cards were discarded at end of turn, and creatures mostly die on the enemy turn, so the sigil
+    almost never fired. Corpse Eater cards now Retain (Inscryption's hand persists); a Corpse Eater Totem adds
+    Retain to its tribe's cards in combat.
+  - The sacrifice grid built stand-in cards from the base card, so the Cat always read "9 lives" there. Stand-ins
+    now copy the summoning card's campfire bonuses and lives (`ICreatureCard.CopyStateFrom`).
+  - A Cat with no lives left kept Many Lives. `Sacrifice.Stays` now excludes it, so its next sacrifice kills it.
+- Not tested: a Totem carrying a batch-2 sigil; an upgraded Unkillable copy keeping its upgrade (code clones the
+  played card).
+- Test-harness gotchas:
+  - Steam Cloud sync undid the first save restore. At launch the game copies cloud -> local for any save whose
+    local modified time differs from the cloud's (`CloudSaveStore.SyncCloudToLocalInternal`); a plain `cp`
+    gives a new mtime, so the cloud's post-test files came back. A restore must copy the backup in and then set
+    each file's mtime to the cloud time, which Steam records as `remotetime` in
+    `~/.steam/.../userdata/<id>/2868840/remotecache.vdf`. Done that way, the launch skipped the sync, Continue
+    returned to the Thieving Hopper loot (floor 19, 159 gold, 27 cards), and the quit uploaded it to the cloud.
+  - `damage <n> <index>` targets `CombatState.Creatures` (player, every pet ever summoned this combat including
+    dead ones, then enemies). One mistyped console command (xdotool typed "INSCRPYTION") left a pet unsummoned,
+    the indexes landed on the enemies, the fight was won, and the run saved again. Do not kill by index in
+    loops; test sacrifices with multi-Blood cards on a full board instead, and check the log after each step.
 
 ### Gotchas found in game
 

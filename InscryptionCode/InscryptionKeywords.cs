@@ -30,4 +30,13 @@ public class InscryptionKeywords
     [CustomEnum] [KeywordProperties(AutoKeywordPosition.Before)] public static CardKeyword Burrower;
     [CustomEnum] [KeywordProperties(AutoKeywordPosition.Before)] public static CardKeyword Guardian;
     [CustomEnum] [KeywordProperties(AutoKeywordPosition.Before)] public static CardKeyword Sprinter;
+    [CustomEnum] [KeywordProperties(AutoKeywordPosition.Before)] public static CardKeyword ManyLives;
+    [CustomEnum] [KeywordProperties(AutoKeywordPosition.Before)] public static CardKeyword WorthySacrifice;
+    [CustomEnum] [KeywordProperties(AutoKeywordPosition.Before)] public static CardKeyword BoneKing;
+    [CustomEnum] [KeywordProperties(AutoKeywordPosition.Before)] public static CardKeyword Unkillable;
+    [CustomEnum] [KeywordProperties(AutoKeywordPosition.Before)] public static CardKeyword CorpseEater;
+    [CustomEnum] [KeywordProperties(AutoKeywordPosition.Before)] public static CardKeyword FrozenAway;
+
+    /// <summary>Not a sigil: a card that holds a lane but cannot be sacrificed (Inscryption's terrain).</summary>
+    [CustomEnum] [KeywordProperties(AutoKeywordPosition.Before)] public static CardKeyword Terrain;
 }

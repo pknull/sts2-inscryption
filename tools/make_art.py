@@ -50,6 +50,14 @@ CREATURES = {
     "river_otter": ("river_otter_flat", "river_otter_flat_cut", 100),
     "mole": ("mole_flat", "mole_flat_cut", 80),
     "mole_man": ("mole_man_flat", "mole_man_flat_cut", 170),
+    "black_goat": ("black_goat_flat", "black_goat_flat_cut", 120),
+    "cat": ("cat_flat", "cat_flat_cut", 100),
+    "undead_cat": ("undead_cat_flat", "undead_cat_flat_cut", 110),
+    "cockroach": ("cockroach_flat", "cockroach_flat_cut", 70),
+    "corpse_maggots": ("corpse_maggots_flat", "corpse_maggots_flat_cut", 70),
+    "rat_king": ("rat_king_flat", "rat_king_flat_cut", 110),
+    "ouroboros": ("ouroboros_flat", "ouroboros_flat_cut", 100),
+    "frozen_opossum": ("frozen_opossum_flat", "frozen_opossum_flat_cut", 100),
 }
 
 

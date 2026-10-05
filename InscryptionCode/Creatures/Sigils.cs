@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Monsters;
 
 namespace Inscryption.InscryptionCode.Creatures;
@@ -22,6 +23,12 @@ public enum Sigil
     Burrower,
     Guardian,
     Sprinter,
+    ManyLives,
+    WorthySacrifice,
+    BoneKing,
+    Unkillable,
+    CorpseEater,
+    FrozenAway,
 }
 
 /// <summary>Inscryption's tribes; Totems grant a sigil to every creature of one tribe.</summary>
@@ -68,6 +75,12 @@ public static class Sigils
         Sigil.Burrower => InscryptionKeywords.Burrower,
         Sigil.Guardian => InscryptionKeywords.Guardian,
         Sigil.Sprinter => InscryptionKeywords.Sprinter,
+        Sigil.ManyLives => InscryptionKeywords.ManyLives,
+        Sigil.WorthySacrifice => InscryptionKeywords.WorthySacrifice,
+        Sigil.BoneKing => InscryptionKeywords.BoneKing,
+        Sigil.Unkillable => InscryptionKeywords.Unkillable,
+        Sigil.CorpseEater => InscryptionKeywords.CorpseEater,
+        Sigil.FrozenAway => InscryptionKeywords.FrozenAway,
         _ => throw new ArgumentOutOfRangeException(nameof(sigil)),
     };
 
@@ -83,9 +96,13 @@ public static class Sigils
         _ => throw new ArgumentOutOfRangeException(nameof(tribe)),
     };
 
-    /// <summary>Keywords shown on a creature card: its tribe (if any), then its sigils.</summary>
+    /// <summary>Keywords shown on a creature card: Terrain, its tribe (if any), then its sigils.</summary>
     public static IEnumerable<CardKeyword> Keywords(CreatureStats stats)
     {
+        if (stats.Terrain)
+        {
+            yield return InscryptionKeywords.Terrain;
+        }
         if (stats.Tribe != Tribe.None)
         {
             yield return Keyword(stats.Tribe);
@@ -113,9 +130,17 @@ public static class Sigils
         {
             return true;
         }
-        return creature.CombatState != null && Totems.TryGetValue(creature.CombatState, out var totems)
-            && totems.Any(t => t.Sigil == sigil && (board.Stats.Tribe & t.Tribe) != 0);
+        return FromTotem(creature.CombatState, board.Stats.Tribe, sigil);
     }
+
+    /// <summary>Does this creature card have the sigil, printed or from a Totem? (Corpse Eater acts from the hand.)</summary>
+    public static bool CardHas(CardModel card, Sigil sigil) =>
+        card is Cards.ICreatureCard creature
+        && (creature.Stats.Sigils.Contains(sigil) || FromTotem(card.Owner?.Creature.CombatState, creature.Stats.Tribe, sigil));
+
+    private static bool FromTotem(ICombatState? combatState, Tribe tribe, Sigil sigil) =>
+        combatState != null && Totems.TryGetValue(combatState, out var totems)
+        && totems.Any(t => t.Sigil == sigil && (tribe & t.Tribe) != 0);
 
     public static IEnumerable<Sigil> All(Creature creature) => Modular.Where(s => Has(creature, s));
 

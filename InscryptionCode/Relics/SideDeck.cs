@@ -1,6 +1,5 @@
 using Inscryption.InscryptionCode.Cards;
 using Inscryption.InscryptionCode.Creatures;
-using Inscryption.InscryptionCode.Powers;
 using Inscryption.InscryptionCode.RestSite;
 using MegaCrit.Sts2.Core.Entities.RestSite;
 using MegaCrit.Sts2.Core.Commands;
@@ -15,7 +14,7 @@ namespace Inscryption.InscryptionCode.Relics;
 
 /// <summary>
 /// Starting relic carrying Inscryption's economy: the Squirrel side deck (one Squirrel into your hand each turn,
-/// ten per combat) and Bones (one whenever one of your creatures dies).
+/// ten per combat) and what follows a creature's death: Bones and the death sigils (<see cref="Afterlife"/>).
 /// </summary>
 public sealed class SideDeck : InscryptionRelic
 {
@@ -63,12 +62,6 @@ public sealed class SideDeck : InscryptionRelic
         return true;
     }
 
-    public override async Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented, float deathAnimLength)
-    {
-        if (creature.PetOwner != Owner || creature.Monster is not BoardCreature)
-        {
-            return;
-        }
-        await PowerCmd.Apply<BonesPower>(choiceContext, Owner.Creature, 1m, Owner.Creature, null);
-    }
+    public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented, float deathAnimLength) =>
+        Afterlife.AfterDeath(choiceContext, Owner, creature);
 }
