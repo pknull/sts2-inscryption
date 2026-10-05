@@ -52,6 +52,8 @@ internal static class LaneMarkers
         }
     }
 
+    public static void Clear(NCreature node) => node.GetNodeOrNull<Label>(BadgeName)?.QueueFree();
+
     private static void SetBadge(NCreature node, int lane, bool ownCreature)
     {
         var badge = node.GetNodeOrNull<Label>(BadgeName);

@@ -4,5 +4,8 @@
   "INSCRYPTION-CREATURE_POWER.smartDescription": "Takes the hits of the enemy in its lane. At the end of your turn, strikes that enemy (or the first enemy if its lane is empty).",
   "INSCRYPTION-BONES_POWER.title": "Bones",
   "INSCRYPTION-BONES_POWER.description": "Gained whenever one of your creatures dies.",
-  "INSCRYPTION-BONES_POWER.smartDescription": "You have [blue]{Amount}[/blue] Bones."
+  "INSCRYPTION-BONES_POWER.smartDescription": "You have [blue]{Amount}[/blue] Bones.",
+  "INSCRYPTION-TOTEM_POWER.title": "Totems",
+  "INSCRYPTION-TOTEM_POWER.description": "Totems stand this combat. Each gives its sigil to your creatures of its tribe.",
+  "INSCRYPTION-TOTEM_POWER.smartDescription": "[blue]{Amount}[/blue] Totems stand this combat. Each gives its sigil to your creatures of its tribe."
 }

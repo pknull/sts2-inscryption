@@ -31,6 +31,25 @@ CREATURES = {
     "opossum": ("opossum_flat", "opossum_flat_cut", 90),
     "coyote": ("coyote_flat", "coyote_flat_cut", 140),
     "rattler": ("rattler_flat", "rattler_flat_cut", 80),
+    "sparrow": ("sparrow_flat", "sparrow_flat_cut", 80),
+    "raven": ("raven_flat", "raven_flat_cut", 120),
+    "bat": ("bat_flat", "bat_flat_cut", 110),
+    "turkey_vulture": ("turkey_vulture_flat", "turkey_vulture_flat_cut", 140),
+    "kingfisher": ("kingfisher_flat", "kingfisher_flat_cut", 80),
+    "mantis": ("mantis_flat", "mantis_flat_cut", 100),
+    "mantis_god": ("mantis_god_flat", "mantis_god_flat_cut", 130),
+    "pronghorn": ("pronghorn_flat", "pronghorn_flat_cut", 150),
+    "elk": ("elk_flat", "elk_flat_cut", 190),
+    "long_elk": ("long_elk_flat", "long_elk_flat_cut", 200),
+    "alpha": ("alpha_flat", "alpha_flat_cut", 150),
+    "bloodhound": ("bloodhound_flat", "bloodhound_flat_cut", 130),
+    "skunk": ("skunk_flat", "skunk_flat_cut", 90),
+    "porcupine": ("porcupine_flat", "porcupine_flat_cut", 90),
+    "adder": ("adder_flat", "adder_flat_cut", 80),
+    "great_white": ("great_white_flat", "great_white_flat_cut", 120),
+    "river_otter": ("river_otter_flat", "river_otter_flat_cut", 100),
+    "mole": ("mole_flat", "mole_flat_cut", 80),
+    "mole_man": ("mole_man_flat", "mole_man_flat_cut", 170),
 }
 
 
@@ -68,6 +87,9 @@ def character() -> None:
     cutout = ImageOps.mirror(Image.open(GEN / "luke_body_v2_cut.png").convert("RGBA"))
 
     sprite(cutout, 340).save(charui / "body.png")
+    # Shop (standing, larger) and rest site (sitting on a log, facing the fire on his right).
+    sprite(cutout, 460).save(charui / "merchant.png")
+    sprite(ImageOps.mirror(Image.open(GEN / "luke_rest_cut.png").convert("RGBA")), 300).save(charui / "rest_site.png")
 
     # Select icons keep the flat background; crop from the head to the knees (132x195 aspect).
     select_box = (230, 90, 704, 790)
@@ -82,7 +104,7 @@ def character() -> None:
     fit_square(head, 128).save(charui / "map_marker.png")
 
     cover(Image.open(GEN / "luke_select_bg_v2.png").convert("RGB"), (1920, 1080)).save(charui / "char_select_bg.png")
-    print("luke: body, select icon + locked, top-bar icon, map marker, select splash")
+    print("luke: body, merchant, rest site, select icon + locked, top-bar icon, map marker, select splash")
 
 
 def icon(cutout: Image.Image, size: int, margin: float = 0.06) -> Image.Image:
@@ -98,6 +120,21 @@ def outline(img: Image.Image, grow: int = 3) -> Image.Image:
     white = Image.new("RGBA", img.size, (255, 255, 255, 0))
     white.putalpha(alpha)
     return white
+
+
+TOTEMS = ["canine", "hooved", "reptile", "avian", "insect", "squirrel"]
+
+
+def totems() -> None:
+    """Totem card portraits, and the Totem power icon from the Canine totem."""
+    for tribe in TOTEMS:
+        art = Image.open(GEN / f"totem_{tribe}.png").convert("RGB")
+        cover(art, (1000, 760)).save(IMAGES / "card_portraits" / "big" / f"{tribe}_totem.png")
+        cover(art, (250, 190)).save(IMAGES / "card_portraits" / f"{tribe}_totem.png")
+    cut = Image.open(GEN / "totem_canine_cut.png").convert("RGBA")
+    icon(cut, 64).save(IMAGES / "powers" / "totem_power.png")
+    icon(cut, 256).save(IMAGES / "powers" / "big" / "totem_power.png")
+    print(f"totems: {len(TOTEMS)} portraits, power icon")
 
 
 def icons() -> None:
@@ -131,6 +168,7 @@ def main() -> None:
         print(f"{card_id}: portrait 1000x760 + 250x190, sprite {board.width}x{board.height}")
     character()
     icons()
+    totems()
 
 
 if __name__ == "__main__":

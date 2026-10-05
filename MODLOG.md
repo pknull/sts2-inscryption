@@ -153,6 +153,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   inert until sigils/totems exist. Staged; in-game verification pending.
 
 ### Neow's Large Capsule (2026-10-04)
+
 - FAIL (game stuck after picking Large Capsule at Neow): `LargeCapsule.GetStrikeForCharacter` /
   `GetDefendForCharacter` call `CardPool.AllCards.First(Basic && Tags.Contains(Strike|Defend))` with no
   fallback. `Fasten` likewise does `.First(Tags.Contains(Defend))` over unlocked pool cards.
@@ -163,6 +164,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   (`relic add LARGE_CAPSULE`) and it worked.
 
 ### Showing creature power (2026-10-04)
+
 - Keeper: cards say "Summon a 3/9" but the board shows "9/9". The bar under a creature is current/max HP;
   power was shown nowhere. Fix: `BoardCreature`'s idle move carries `SingleAttackIntent(ScaledPower)` when
   power > 0, so the creature shows an attack intent (sword + number) like an enemy. Pets never perform
@@ -179,6 +181,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   stack). `make_art.py icons()` writes 64/256 power icons and the 94 px relic + white outline + 256.
 
 ### Playtest round 2 (2026-10-04, seed SX0XDR6WQ5)
+
 - Verified on screen: attack intents (Stoat 3, Wolf 9), paw/skull/squirrel icons, health x5 (Stoat
   survived at 4/15), Luke's body and top-bar icon.
 - Keeper: lanes behave as intended (enemy N hits creature N, empty lanes hit the player); keep it faithful.
@@ -195,6 +198,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   Staged.
 
 ### Legibility (2026-10-04)
+
 - Keeper: reward pool felt good; playing several creatures felt bad (crowding/overlap -> row fit above);
   attack vs defend confusing: "who blocks whom" and "when things happen". Built all three proposals plus
   the Keeper's "an indicator, like how the reject works" (read as the selection reticle):
@@ -210,6 +214,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   Staged; verification pending.
 
 ### Upgrades and the campfire (2026-10-04)
+
 - Found: creature cards had no `OnUpgrade`, but `MaxUpgradeLevel` defaults to 1, so Smith offered them and
   the upgrade did nothing. Keeper's design: Smith gives the StS-style upgrade (Blood -1), and a new
   Campfire rest option gives Inscryption's warmth (+1 Power or +2 Health) for the run.
@@ -231,6 +236,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   Real check: warm a card, save and quit, continue, inspect the card.
 
 ### Playtest round 3 (2026-10-04, floor 9)
+
 - Verified on screen: lane badges 1-2-3 on creatures and enemies, attack intents (warmed River Snapper
   shows 6), paw/skull icons, Campfire present.
 - FAIL: the row still ran under enemy 1 when three enemies stood close; the shrink hit its 0.55 floor.
@@ -240,6 +246,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   left its combat state. Staged.
 
 ### Layout rethink (2026-10-04, Phrog Parasite elite)
+
 - Keeper: "pretty broken at the moment visually ... a terrible jumble". Causes: (1) the step-back build
   recorded "home" during combat setup, before the room positions the player, so Luke snapped to mid-room;
   (2) fitting the row to the nearest enemy collapses when an elite splits into four parasites near the
@@ -258,6 +265,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
 - Superseded the earlier mapping "Lanes shift when a creature dies".
 
 ### Card types, Bones cards, shop (2026-10-04)
+
 - FAIL: shop crashed: `CardFactory.CreateForMerchant` stocks types Attack x2, Skill x2, Power x1
   (`MerchantInventory._coloredCardTypes`) from non-Basic pool cards and throws when a type is missing; all
   creatures were Skills. Type also drives Attack/Skill/Power Potions and ~30 relics (Shuriken, Kunai, Pen Nib,
@@ -275,6 +283,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   Staged; verification pending.
 
 ### Stagger and true scale (2026-10-04, floor 15)
+
 - Verified on screen: four fixed slots with lane badges 1-4; Opossum (Bones card) summoned; Rattler card
   shows the Attack frame.
 - FAIL: creature health bars and status rows overlapped. Cause: `NCreature.ScaleTo` is a temporary visual
@@ -285,10 +294,12 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   Keeper's stagger: lanes 2 and 4 stand 40 px back (up) with ZIndex 0; lanes 1 and 3 in front (ZIndex 1).
 
 ### Agent-driven verification (2026-10-04, Keeper away and authorized driving the game)
+
 - Method: xdotool on the game window (2560x1440), dev console (` key) for `room shop|restsite|monster`,
-  `godmode`, `card <ID>`; screenshots via `import -window`. Console-jumped rooms are NOT saved
-  (`RunManager.EnterRoomDebug`; save file unchanged by Save and Quit), so tests left the Keeper's run as it
-  was: Continue returns to the post-Thieving-Hopper loot (deck 27, 159 gold, floor 19). Modded saves backed
+  `godmode`,`card <ID>`; screenshots via`import -window`. Console-jumped rooms are not saved on entry or by
+  Save and Quit (`RunManager.EnterRoomDebug`), so tests left the Keeper's run as it was: Continue returns to
+  the post-Thieving-Hopper loot (deck 27, 159 gold, floor 19). Correction from batch 1: WINNING a console
+  fight does save (see below). Modded saves backed
   up first (`~/.universal-modder/backups/sts2-modded-saves/`). Gotcha: typing while the console is closed
   sends hotkeys to the game (opened the deck view, toggled View Upgrades); open the console, screenshot to
   confirm, then type.
@@ -302,6 +313,88 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   blocking with overkill cap (15-damage hit shows 5 on a 5-HP Squirrel); Bones +1 per death; Opossum spends
   2 Bones, takes empty lane 1, Bones power removed at 0; hover reticle (enemy 1 brackets the lane-1 creature).
 - Not visually confirmed: the strike lunge tween (frames caught the death, not the hop).
+
+### Rest site and shop scenes (2026-10-04)
+
+- Luke at the rest site (new fal pose: sitting on a log with creature cards, mirrored to face the fire) and in
+  the shop (standing body at 460 px). `CustomRestSiteAnimPath` / `CustomMerchantAnimPath` point at
+  single-Sprite2D scenes (`Inscryption/scenes/rest_site.tscn`, `merchant.tscn`); BaseLib's
+  NRestSiteCharacterFactory / NMerchantCharacterFactory build hitbox, flip point and thought bubbles.
+  Energy counter and card trail are still Ironclad placeholders.
+
+### Sigils and Totems, batch 1 of 3 (2026-10-04)
+
+- Keeper's design calls: Totems are Power cards (not the Woodcarver event); Touch of Death kills normal enemies
+  only (elites and bosses are "made of stone", Kaycee's Mod's immunity); Mighty Leap = flying enemies (their
+  hits pass over blockers to Luke unless the blocker has Mighty Leap). Build in three batches, verify and
+  commit after each.
+- Not ported (enemy/boss-only in Act 1): Repulsive, Steel Trap, Tidal Lock, Omni Strike.
+- Translations: Airborne = strikes ignore Block (ValueProp.Unblockable); Waterborne = unhittable on the enemy
+  turn (`ShouldAllowHitting`) and doesn't block; Stinky = lane enemy -3 per hit (`ModifyDamageAdditive`, also
+  lowers its intent); Sharp Quills = 3 back to an attacker (`AfterDamageReceived`, Unpowered); Burrower =
+  moves into the empty lane being attacked inside `ModifyUnblockedDamageTarget`; Guardian = at the enemy turn's
+  start, if its lane's enemy isn't attacking, moves to the leftmost empty lane facing an attacker;
+  Sprinter = moves one lane after striking, flipping at edges/blocks; Bi/Trifurcated = lanes L-1/L+1 (+L),
+  edge lanes dropped, empty target lanes fall back to the first enemy; Leader = +1 Power to creatures in
+  adjacent lanes (live in `ScaledPower`; `BoardLayout.Refresh` re-shows intents).
+- Flyers: Byrdonis, OwlMagistrate, ThievingHopper (decompile shows flight/hover/swoop states). One list in
+  `Sigils.Flyers`; candidates to check in the bestiary: Ovicopter, Flyconid, Byrdpip, Parafright, Vantom.
+- Engine: `Sigil` and `[Flags] Tribe` enums; sigils and tribes are BaseLib CustomEnum CardKeywords (keys drop the
+  underscore: `INSCRYPTION-MIGHTYLEAP`), mapped lazily because BaseLib fills the fields at runtime. Creature
+  sigils = card sigils copied to `BoardCreature.OwnSigils` at summon + Totems of its tribe (per-combat
+  registry keyed by the combat state). Hovering a creature lists its sigils (`CreaturePower.ExtraHoverTips`).
+- Totems: six Power cards (Canine, Hooved, Reptile, Avian, Insect, Squirrel), 1 energy, Uncommon. The sigil is
+  rolled at `AfterCreated` from `new Rng(Owner, Id, copies-in-deck)` and saved as
+  `[SavedProperty] Inscryption_TotemSigil`, whose setter swaps the card's keyword.
+- 19 creatures (stats from the reference; rarity: Common = simple sigils and <=2 Blood/<=4 Bones; Uncommon =
+  strong sigils or >=3 Blood or >=6 Bones; Rare = Inscryption rares): Sparrow, Raven, Bat, Turkey Vulture,
+  Kingfisher, Mantis, Mantis God (R), Pronghorn, Elk, Long Elk (R), Alpha, Bloodhound, Skunk, Porcupine,
+  Adder, Great White, River Otter, Mole, Mole Man (R). Bullfrog gains Mighty Leap; tribes on existing cards.
+
+### Batch 1 verified in game (2026-10-04, agent driving; Byrdonis elite, then Nibbits normal)
+
+- Airborne enemy: Byrdonis's hits passed over a Squirrel and an Adder in its lane (both unhurt).
+- Mighty Leap: a Bullfrog in Byrdonis's lane took its three hits and died; tooltip on hover.
+- Touch of Death: 3 damage left the Byrdonis elite alive (78 -> 75); against a normal Nibbit at 26/44 the
+  Adder's 3 damage killed it outright.
+- Stinky: the lane Nibbit's intent dropped 6 -> 3 when the Skunk was summoned; the Skunk took 3.
+- Trifurcated: Mantis God in lane 2 hit Nibbit 1, Nibbit 2, and lane 3 (empty -> first enemy); totals matched
+  (42 -> 33, 44 -> 41). Bifurcated: Mantis in lane 3 hit Nibbit 2 and lane 4 (empty -> Nibbit 1); Nibbit 2
+  ended 40/46 (43 if it were not bifurcated).
+- Guardian: Bloodhound left lane 1 (enemy buffing) for empty lane 2 and took the 14.
+- Waterborne: River Otter in lane 1 untouched by the 14; the hit went past it to Luke.
+- Sharp Quills: Porcupine took 8 (10 -> 2) and the Nibbit took 3 back (38 -> 35).
+- Sprinter: Elk struck from lane 1, then moved to lane 2; boxed in on both sides, it stayed put.
+- Burrower: with lane 1 emptied, the Mole dug from lane 3 into lane 1 and took the 8 (20 -> 12).
+- Leader: the Elk's intent rose 6 -> 9 when the Alpha was summoned beside it.
+- Totem: a Hooved Totem (rolled Trifurcated) gave the Elk Trifurcated Strike (hover lists it with Sprinter);
+  the totem power shows on Luke. The shop's Power slot now stocks a Totem (Canine, rolled Sprinter).
+- Card text and tooltips: tribe and sigil keywords render on cards, the sacrifice grid and creature hovers.
+- Rest site: Luke on his log by the fire, Rest / Smith / Campfire. Shop: Luke standing, left of the merchant.
+- Fixed after the first pass, re-verified in a second session:
+  - Merchant scene threw `Expected BoundObject to be a SpineSprite, but it is a Sprite2D` (caught, logged).
+    BaseLib's scene auto-conversion (`NodeFactory.TryAutoConvert`) never marks the node as factory-made, so its
+    `MerchantCharacterAnimPatch` guard lets `NMerchantCharacter._Ready` play a Spine animation on our sprite.
+    `Patches/MerchantSpriteGuard` skips `_Ready`/`PlayAnimation` when child 0 is not a SpineSprite. Zero
+    exceptions after. (Worth reporting upstream to BaseLib.)
+  - Stale lane badge: `RemoveCreatureNode` drops the node from the room's list but leaves it on screen for its
+    death animation, so the badge refresh never reached it. `LaneMarkers.Clear` on removal; a double
+    sacrifice and a creature killed in combat now leave no badge behind.
+  - Multi-lane strikers showed a single number. They now show "3x3" (Trifurcated) / "3x2" (Bifurcated) via a
+    live `MultiAttackIntent`; `Sigils.StrikeLanes` is shared by the intent and the strike.
+- Not observed: Airborne strike ignoring Block (the Elk broke the block first; code is `ValueProp.Unblockable`).
+- Polish noted: keyword order on cards varies (Mole: "Creature. Burrower."; Adder: "Touch of Death. Reptile.
+  Creature."); a Totem's rolled sigil is seeded per player/card/copies owned, so offers of the same Totem repeat
+  their sigil until one is bought.
+- Test-harness gotchas:
+  - `fight <ENC>` issued mid-combat with creatures on the board killed the game silently (the old pets were
+    carried into the new room). Start console fights from a non-combat room (loot screen, shop).
+  - WINNING a console fight writes the run save (`pre_finished_room`, map history, RNG counters, progress
+    stats); it replaced the Keeper's post-Thieving-Hopper loot. Pre-fight files kept in
+    `~/.universal-modder/backups/sts2-modded-saves/pre-nibbits-20261004-1853/`. Test without winning, or
+    back up and restore.
+  - The console only opens when the game window has focus: `xdotool windowactivate --sync` first, and check
+    the console overlay is up before typing (otherwise letters are hotkeys; "E" ends the turn).
 
 ### Gotchas found in game
 

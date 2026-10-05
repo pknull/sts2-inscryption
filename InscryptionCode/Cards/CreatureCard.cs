@@ -78,7 +78,7 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
         new DynamicVar("Health", Health),
     ];
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords => [InscryptionKeywords.Creature];
+    public override IEnumerable<CardKeyword> CanonicalKeywords => [InscryptionKeywords.Creature, .. Sigils.Keywords(stats)];
 
     // Free creatures have no cost to lower, and Inscryption never upgrades Squirrels.
     public override int MaxUpgradeLevel => stats.IsFree ? 0 : 1;
@@ -126,6 +126,7 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
         var board = (BoardCreature)creature.Monster!;
         // Campfire bonuses live on the card; carry them onto this summon.
         board.BonusPower = _powerBonus;
+        board.OwnSigils.UnionWith(stats.Sigils);
         if (Health != creature.MaxHp)
         {
             await CreatureCmd.SetMaxHp(creature, Health);

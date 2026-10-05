@@ -63,7 +63,12 @@ public class Inscryption : PlaceholderCharacterModel
 
     public override string CustomCharacterSelectBg => $"{MainFile.ResPath}/scenes/char_select_bg.tscn";
 
-    // A static image instead of the placeholder's Ironclad skeleton; rest site and merchant still use Ironclad's.
+    // Single-Sprite2D scenes; BaseLib converts them into the rest site and merchant characters.
+    public override string CustomRestSiteAnimPath => $"{MainFile.ResPath}/scenes/rest_site.tscn";
+    public override string CustomMerchantAnimPath => $"{MainFile.ResPath}/scenes/merchant.tscn";
+
+    // A static image instead of the placeholder's Ironclad skeleton. The energy counter and card trail are still
+    // Ironclad's placeholders.
     public override NCreatureVisuals? CreateCustomVisuals() =>
         NodeFactory<NCreatureVisuals>.CreateFromResource("body.png".CharacterUiPath());
 }

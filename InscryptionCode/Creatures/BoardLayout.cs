@@ -62,6 +62,15 @@ internal static class BoardLayout
         }
     }
 
+    /// <summary>Re-run the layout, lane badges and attack intents (Leader changes neighbours' power).</summary>
+    public static void Refresh()
+    {
+        if (NCombatRoom.Instance is { } room)
+        {
+            Rearrange(room);
+        }
+    }
+
     /// <summary>Re-run the layout and lane badges whenever any creature comes or goes.</summary>
     private static void Rearrange(NCombatRoom room)
     {
@@ -71,6 +80,10 @@ internal static class BoardLayout
         if (me != null && Board.UsesLanes(me))
         {
             Arrange(room, me);
+            foreach (var creature in Board.Creatures(me))
+            {
+                ((BoardCreature)creature.Monster!).ShowIntent();
+            }
         }
         LaneMarkers.Refresh(room);
     }
@@ -85,7 +98,13 @@ internal static class BoardLayout
     [HarmonyPatch(typeof(NCombatRoom), nameof(NCombatRoom.RemoveCreatureNode))]
     private static class OnRemove
     {
+        // The node leaves the room's list at once but stays on screen for its death animation, which the badge
+        // refresh no longer reaches; take its lane badge off here.
         [HarmonyPostfix]
-        private static void Postfix(NCombatRoom __instance) => Rearrange(__instance);
+        private static void Postfix(NCombatRoom __instance, NCreature node)
+        {
+            LaneMarkers.Clear(node);
+            Rearrange(__instance);
+        }
     }
 }

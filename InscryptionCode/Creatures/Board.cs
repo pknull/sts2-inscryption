@@ -54,6 +54,18 @@ public static class Board
     public static Creature? EnemyInLane(ICombatState? combatState, int lane) =>
         lane < 0 ? null : Enemies(combatState).FirstOrDefault(e => LaneOrNone(e) == lane);
 
+    /// <summary>Move one of the player's creatures to an empty lane (Sprinter, Guardian, Burrower).</summary>
+    public static bool MoveTo(Creature creature, int lane)
+    {
+        if (creature.PetOwner == null || lane < 0 || lane >= LaneCount || CreatureInLane(creature.PetOwner, lane) != null)
+        {
+            return false;
+        }
+        Lanes.AddOrUpdate(creature, new StrongBox<int>(lane));
+        BoardLayout.Refresh();
+        return true;
+    }
+
     private static int LaneOrNone(Creature creature) => Lanes.TryGetValue(creature, out var lane) ? lane.Value : -1;
 
     /// <summary>
