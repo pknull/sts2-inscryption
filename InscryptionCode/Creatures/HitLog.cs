@@ -33,11 +33,12 @@ internal static class HitLog
     /// <summary>Call after <see cref="Blocking.BeforeHit"/>, so the blocker it chose is known.</summary>
     public static void Before(Player player, Creature target, decimal amount, ValueProp props, Creature? dealer)
     {
-        Pending.Remove(target);
+        // Every player's relic hears every hit; only the target's own Luke records it.
         if (!Board.UsesLanes(player) || (target != player.Creature && target.PetOwner != player))
         {
             return;
         }
+        Pending.Remove(target);
         var blocker = Blocking.PendingBlocker(target);
         Pending[target] = new Hit
         {
@@ -104,5 +105,8 @@ internal static class HitLog
         return line;
     }
 
-    private static string Name(Creature creature) => creature.IsPlayer ? "Luke" : creature.Monster?.Id.Entry ?? "?";
+    // In co-op, which Luke: his player slot.
+    private static string Name(Creature creature) => creature.IsPlayer
+        ? creature.Player is { RunState.Players.Count: > 1 } p ? $"Luke {p.RunState.GetPlayerSlotIndex(p) + 1}" : "Luke"
+        : creature.Monster?.Id.Entry ?? "?";
 }

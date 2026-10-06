@@ -41,17 +41,12 @@ public interface ICreatureCard
 /// An Inscryption creature card. It is dragged to a lane (<see cref="LaneDrop"/>): it pays its Blood (sacrificing
 /// creatures already on the board, see <see cref="Sacrifice"/>) or its Bones, then summons
 /// <typeparamref name="TCreature"/> into that lane, or the lowest empty lane if that one is taken. It costs no
-/// energy: Blood and
-/// Bones are the costs, as in Inscryption. Upgrading (Smith) lowers that cost by 1; the campfire raises the
-/// creature's stats for the run. Attackers (Power at least Health) are Attack cards; defenders and free creatures
-/// are Skills.
+/// energy: Blood and Bones are the costs, as in Inscryption. Upgrading (Smith) lowers that cost by 1; the campfire
+/// raises the creature's stats for the run. Every creature card is a Skill: summoning is not an attack.
 /// </summary>
-public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity rarity)
-    : InscryptionCard(0, TypeFor(stats), rarity, TargetType.Self), ICreatureCard where TCreature : BoardCreature
+public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity rarity, CardType type = CardType.Skill)
+    : InscryptionCard(0, type, rarity, TargetType.Self), ICreatureCard where TCreature : BoardCreature
 {
-    private static CardType TypeFor(CreatureStats s) =>
-        s.IsFree || s.Power < s.Health ? CardType.Skill : CardType.Attack;
-
     private int _powerBonus;
     private int _healthBonus;
 
@@ -171,8 +166,8 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
             await Summoning.Summon<TCreature>(choiceContext, Owner, stats, _powerBonus, _healthBonus, this, lane);
             return;
         }
-        // The lane it was dropped on; sacrifices may free it.
-        int chosenLane = LaneDrop.Take(this);
+        // The lane it was dropped on (sent to the other players in co-op); sacrifices may free it.
+        int chosenLane = await LaneDrop.Choose(choiceContext, this);
         await Sacrifice.Perform(await ChooseSacrifices(choiceContext));
         if (Bones > 0)
         {

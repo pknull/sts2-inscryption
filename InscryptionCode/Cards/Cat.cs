@@ -12,7 +12,7 @@ namespace Inscryption.InscryptionCode.Cards;
 /// sacrifice spends the last life: the card in the deck becomes the Undead Cat, and the Cat still on the board has
 /// no lives left, so its next sacrifice kills it.
 /// </summary>
-public sealed class Cat() : CreatureCard<CatCreature>(Bestiary.Cat, CardRarity.Common)
+public sealed class Cat() : CreatureCard<CatCreature>(Bestiary.Cat, CardRarity.Rare)
 {
     private const int Lives = 9;
 

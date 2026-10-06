@@ -31,18 +31,21 @@ Ironclad and Luke unlocked.
 
 ## How Luke plays
 
-- **Starting deck:** 4 Strike, 4 Defend, 2 Stoat. More creatures join through card rewards, like any other
+- **Starting deck:** 4 Strike, 4 Defend, 2 Squirrel. More creatures join through card rewards, like any other
   character's cards.
 - **Side Deck (starting relic):** a Squirrel arrives in your hand each turn, 10 per combat.
-- **Creature cards cost no energy.** They cost a sacrifice (creatures already on your board) or Bones (gained
-  whenever one of your creatures dies).
+- **The Scale:** Luke heals half the HP that he and his creatures take from enemies (Block and overkill don't
+  count).
+- **Creature cards are Skills and cost no energy.** They cost a sacrifice (creatures already on your board) or
+  Bones (gained whenever one of your creatures dies).
 - **Lanes:** drag a creature card to a lane (an empty slot, or the enemy facing it) to summon it there. If that
   lane is taken, it goes to the lowest empty lane.
 - **Blocking:** a creature takes the hits of the enemy in its lane; damage beyond its HP goes through to Luke, then
   his Block. An enemy facing an empty lane hits Luke directly. At the end of your turn, each creature strikes the
-  enemy in its lane.
+  enemy in its lane; a lane with no enemy is not struck.
 - **Sigils** from Inscryption (Airborne, Bifurcated Strike, Many Lives, Unkillable and more) are on the cards and
   explained in their tooltips. **Totems** grant a sigil to a whole tribe for the combat.
+- **Cockroaches breed:** every Cockroach that dies adds a new Cockroach curse to your deck for good.
 - **Rest sites:** Luke's Campfire option makes one creature card stronger (+3 damage per strike or +10 HP).
 
 ## Reporting a bug

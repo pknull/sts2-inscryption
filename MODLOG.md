@@ -570,6 +570,35 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
 - Levers once a run has the log: creature HP that grows by act, or cheaper ways to buy creature HP; a Block-order
   fix instead if the split points there.
 
+### Co-op and the Keeper's rule changes (2026-10-06, issues #1-#11, agent driving)
+
+- The Keeper's two co-op runs on 2026-10-05 (host and one client, both Luke) diverged four times. Cause: the
+  drag-to-lane lane was read from the local mouse and never sent, so the dropping machine summoned into that lane
+  and the others into the lowest empty one; from then on sacrifices and blocks differed. Second, `Board` handed out
+  lanes on any lookup, and the UI's lookups run on each machine's own schedule.
+- Fixes: `LaneDrop.Choose` sends the lane through `PlayerChoiceSynchronizer` as an index choice (as `CardSelectCmd`
+  does); UI reads lanes through `Board.Shown`, which never assigns; enemy lanes are assigned at combat start, enemy
+  arrival and enemy death (`SideDeck`). Every relic hears every hit, so `Blocking` and `HitLog` now return early
+  for another Luke's hits (#2), and Totems record their owner (#3). `BoardLayout` gives every Luke a lane row in
+  front of the local player; others' rows stand back at 0.8 scale; a non-Luke local player keeps the front row (#4).
+  `Summoning` re-runs the layout after a summon takes its lane (the room laid the node out before it had one).
+- Co-op test harness: two or three local instances, no Steam, own saves under `default/<id>`:
+  `SlayTheSpire2 --force-steam off --fastmp host_standard --log-file host.log` and
+  `--force-steam off --fastmp join --clientId 1000 --log-file client.log` (another `--clientId` for a third). Seed
+  each account's `settings.save` with `mods_enabled: true` (else the mod popup quits) and windowed size; i3 tiles
+  new windows, so float and size them with `i3-msg`. `xdotool search --pid P --name N` ORs the two; add `--all`.
+  Clicks into an unfocused window are dropped: activate first.
+- Verified: baseline on 71f3278 diverged at "After enemy turn end" (host's Squirrel blocked, client saw an empty
+  lane). With the fix: two Lukes, three Lukes, and Ironclad host with a Luke client all logged identical hits on
+  every machine and no divergence; the client's lane arrives as `PlayerChoiceResult indexes N`; a Totem buffed only
+  its owner's Gecks; co-op Campfire and shop work. The partner Luke's creatures show no HP bars, as the game hides
+  remote players' bars.
+- Gameplay (#5-#11), verified in game: starting deck 4 Strike, 4 Defend, 2 Squirrel; Strike 5; ScalePower heals
+  half the HP each hit takes from an enemy (Strike 5 heals 2, a 3-damage strike heals 1, capped at max HP), logged
+  as `Scale: ...`; a Mantis God in lane 4 struck only the lane-3 slime, once; Mole Man needs two sacrifices; Geck
+  shows blue; every creature card is a Skill; a dead Cockroach adds a curse `CockroachCurse` to the deck, which plays
+  and breeds again. Scale icon is the template placeholder pending fal art.
+
 ### Gotchas found in game
 
 1. Mod-loading popup: choosing "load mods" saves `PlayerAgreedToModLoading` and calls `NGame.Quit()`
@@ -588,7 +617,9 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
 
 ## Next
 
-- Play a run with `HitLog` live and split each elite and boss fight's damage: blocker HP, Luke's Block, open lanes.
+- Push the co-op and rules commit on the Keeper's word; its message closes #1-#11.
+- Scale icon: one fal image plus cutout, on the Keeper's go-ahead.
+- Play a run with HitLog live and split each elite and boss fight's damage: blocker HP, Luke's Block, open lanes.
 - Then a lever for Act 2 hits (creature HP by act, or cheaper creature HP); offense if fights drag.
-- Enemy stats count Luke's creatures as opponents (harmless, unfixed).
-- Inscryption-flavoured non-creature cards; sigil batch 3; field note via `um kb` (Keeper's OK before a PR).
+- Luke has no non-Basic Attacks now: Inscryption-flavoured non-creature cards; sigil batch 3.
+- Enemy stats count Luke's creatures as opponents (harmless, unfixed); field note via `um kb` (Keeper's OK first).

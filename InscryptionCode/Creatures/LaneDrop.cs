@@ -2,10 +2,16 @@ using System.Runtime.CompilerServices;
 using Godot;
 using HarmonyLib;
 using Inscryption.InscryptionCode.Cards;
+using MegaCrit.Sts2.Core.Context;
+using MegaCrit.Sts2.Core.Entities.Multiplayer;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.GameActions;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Multiplayer.Game;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
+using MegaCrit.Sts2.Core.Runs;
 
 namespace Inscryption.InscryptionCode.Creatures;
 
@@ -13,14 +19,42 @@ namespace Inscryption.InscryptionCode.Creatures;
 /// Inscryption lets you place a card in the slot you choose. A creature card is dragged up like any untargeted card;
 /// where it is let go picks the lane: the nearest lane slot on your side, or the enemy facing a lane, whichever is
 /// closest across the screen. Every lane can be chosen, with or without an enemy in it. Keyboard and controller plays
-/// have no drop point and take the lowest empty lane.
+/// have no drop point and take the lowest empty lane. In co-op only the player who dropped the card saw where, so the
+/// lane travels to the other players as a choice made during the play (<see cref="Choose"/>).
 /// </summary>
 internal static class LaneDrop
 {
     private static readonly ConditionalWeakTable<CardModel, StrongBox<int>> Dropped = new();
 
+    /// <summary>
+    /// The lane a creature card being played goes to (0-3), or -1 for the lowest empty lane. The owner's game reads
+    /// where the card was dropped and sends it on, the way the game sends any choice made during a play (as
+    /// <c>CardSelectCmd</c> does); the other players' games wait for it.
+    /// </summary>
+    public static async Task<int> Choose(PlayerChoiceContext choiceContext, CardModel card)
+    {
+        var owner = card.Owner;
+        var choices = RunManager.Instance.PlayerChoiceSynchronizer;
+        // Reserved before the play pauses, so every game numbers this choice alike.
+        uint choiceId = choices.ReserveChoiceId(owner);
+        await choiceContext.SignalPlayerChoiceBegun(PlayerChoiceOptions.None);
+        int lane;
+        if (LocalContext.IsMe(owner) && RunManager.Instance.NetService.Type != NetGameType.Replay)
+        {
+            lane = Take(card);
+            // No lane goes as no index, which reads back as -1.
+            choices.SyncLocalChoice(owner, choiceId, PlayerChoiceResult.FromIndex(lane >= 0 ? lane : null));
+        }
+        else
+        {
+            lane = (await choices.WaitForRemoteChoice(owner, choiceId)).AsIndex();
+        }
+        await choiceContext.SignalPlayerChoiceEnded();
+        return lane;
+    }
+
     /// <summary>The lane the card was dropped on (0-3), or -1; forgets it.</summary>
-    public static int Take(CardModel card)
+    private static int Take(CardModel card)
     {
         if (!Dropped.TryGetValue(card, out var lane))
         {
@@ -107,9 +141,9 @@ internal static class LaneDrop
         {
             Consider(lane, BoardLayout.SlotGlobal(room, player, lane));
         }
-        foreach (var enemy in Board.Enemies(player.Creature.CombatState))
+        foreach (var enemy in Board.Shown.Enemies(player.Creature.CombatState))
         {
-            int lane = Board.LaneOf(enemy);
+            int lane = Board.Shown.LaneOf(enemy);
             if (lane >= 0)
             {
                 Consider(lane, room.GetCreatureNode(enemy)?.GlobalPosition);

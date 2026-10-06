@@ -1,6 +1,6 @@
 {
   "INSCRYPTION-CREATURE.title": "Creature",
-  "INSCRYPTION-CREATURE.description": "Drag it to a lane (a slot on your side, or the enemy facing it) to summon it there; if that lane is taken, it takes the lowest empty lane. Takes the hits of the enemy in its lane; damage beyond its HP goes through to you. At the end of your turn, strikes that enemy. If a lane has no creature, its enemy hits you.",
+  "INSCRYPTION-CREATURE.description": "Drag it to a lane (a slot on your side, or the enemy facing it) to summon it there; if that lane is taken, it takes the lowest empty lane. Takes the hits of the enemy in its lane; damage beyond its HP goes through to you. At the end of your turn, strikes that enemy, if there is one. If a lane has no creature, its enemy hits you.",
   "INSCRYPTION-CANINETRIBE.title": "Canine",
   "INSCRYPTION-CANINETRIBE.description": "A tribe. Canine Totems give their sigil to this creature.",
   "INSCRYPTION-HOOVEDTRIBE.title": "Hooved",

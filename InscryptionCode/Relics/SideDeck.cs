@@ -1,7 +1,9 @@
 using Inscryption.InscryptionCode.Cards;
 using Inscryption.InscryptionCode.Creatures;
+using Inscryption.InscryptionCode.Powers;
 using Inscryption.InscryptionCode.RestSite;
 using MegaCrit.Sts2.Core.Entities.RestSite;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -16,7 +18,8 @@ namespace Inscryption.InscryptionCode.Relics;
 
 /// <summary>
 /// Starting relic carrying Inscryption's economy: the Squirrel side deck (one Squirrel into your hand each turn,
-/// ten per combat) and what follows a creature's death: Bones and the death sigils (<see cref="Afterlife"/>).
+/// ten per combat), the scale (<see cref="ScalePower"/>) and what follows a creature's death: Bones and the death
+/// sigils (<see cref="Afterlife"/>).
 /// </summary>
 public sealed class SideDeck : InscryptionRelic
 {
@@ -36,11 +39,30 @@ public sealed class SideDeck : InscryptionRelic
         }
     }
 
-    public override Task BeforeCombatStart()
+    public override async Task BeforeCombatStart()
     {
         SquirrelsLeft = Balance.SideDeckSize;
         HitLog.Reset();
+        LaneEnemies(Owner.Creature.CombatState);
+        // The scale: Luke heals half the damage he and his creatures deal.
+        await PowerCmd.Apply<ScalePower>(new ThrowingPlayerChoiceContext(), Owner.Creature, 1m, Owner.Creature, null);
+    }
+
+    // Enemy lanes are handed out here, at fixed points of the combat, so every player's game agrees on them: at the
+    // start, when an enemy arrives, and when one dies (an enemy waiting without a lane steps into the freed one).
+    public override Task AfterCreatureAddedToCombat(Creature creature)
+    {
+        if (creature.IsEnemy)
+        {
+            LaneEnemies(creature.CombatState);
+        }
         return Task.CompletedTask;
+    }
+
+    private static void LaneEnemies(ICombatState? combatState)
+    {
+        Board.Enemies(combatState);
+        BoardLayout.Refresh();
     }
 
     public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
@@ -65,8 +87,14 @@ public sealed class SideDeck : InscryptionRelic
         return true;
     }
 
-    public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented, float deathAnimLength) =>
-        Afterlife.AfterDeath(choiceContext, Owner, creature);
+    public override Task AfterDeath(PlayerChoiceContext choiceContext, Creature creature, bool wasRemovalPrevented, float deathAnimLength)
+    {
+        if (creature.IsEnemy)
+        {
+            LaneEnemies(creature.CombatState);
+        }
+        return Afterlife.AfterDeath(choiceContext, Owner, creature);
+    }
 
     // Lane blocking: the creature in the attacker's lane takes the hit before Luke's Block does (see Blocking).
     public override Task BeforeDamageReceived(PlayerChoiceContext choiceContext, Creature target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)

@@ -26,6 +26,8 @@ public static class Summoning
         {
             Board.MoveTo(creature, lane);
         }
+        // The room laid the board out when the creature arrived, before it had a lane; lay it out again.
+        BoardLayout.Refresh();
         var board = (BoardCreature)creature.Monster!;
         board.BonusPower = powerBonus;
         board.SourceCard = source;

@@ -15,8 +15,8 @@ namespace Inscryption.InscryptionCode.Powers;
 
 /// <summary>
 /// Carried by every creature on the board. It does what Inscryption's board does: the creature takes attacks
-/// aimed down its lane, and strikes across its lane when the player ends the turn. Its sigils (from its card or a
-/// Totem) change how it blocks, strikes and moves.
+/// aimed down its lane, and strikes the enemy across its lane (if any) when the player ends the turn. Its sigils
+/// (from its card or a Totem) change how it blocks, strikes and moves.
 /// </summary>
 public sealed class CreaturePower : InscryptionPower
 {
@@ -113,13 +113,11 @@ public sealed class CreaturePower : InscryptionPower
 
     private async Task Strike(PlayerChoiceContext choiceContext, BoardCreature creature, int lane)
     {
-        var enemies = Board.Enemies(Owner.CombatState);
-        if (enemies.Count == 0)
+        // Lanes only reach lanes: a strike into a lane with no enemy hits nothing.
+        if (Board.EnemyInLane(Owner.CombatState, lane) is not { } target)
         {
             return;
         }
-        // In Inscryption an empty lane lets the hit through to the scale; with no scale here, it hits the first enemy.
-        Creature target = Board.EnemyInLane(Owner.CombatState, lane) ?? enemies[0];
         // Airborne: flies over the blocker, so the hit ignores Block.
         var props = Has(Sigil.Airborne) ? ValueProp.Move | ValueProp.Unblockable : ValueProp.Move;
         Lunge();

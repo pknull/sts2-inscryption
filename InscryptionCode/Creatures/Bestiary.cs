@@ -67,7 +67,7 @@ public static class Bestiary
     public static readonly CreatureStats GreatWhite = new(Blood: 3, Power: 4, Health: 2, SigilList: [Sigil.Waterborne]);
     public static readonly CreatureStats RiverOtter = new(Blood: 1, Power: 1, Health: 1, SigilList: [Sigil.Waterborne]);
     public static readonly CreatureStats Mole = new(Blood: 1, Power: 0, Health: 4, SigilList: [Sigil.Burrower]);
-    public static readonly CreatureStats MoleMan = new(Blood: 1, Power: 0, Health: 6,
+    public static readonly CreatureStats MoleMan = new(Blood: 2, Power: 0, Health: 6,
         SigilList: [Sigil.Burrower, Sigil.MightyLeap]);
 
     // Batch 2: sacrifice and death sigils.

@@ -25,8 +25,13 @@ internal static class Blocking
     /// </summary>
     public static void BeforeHit(Player player, Creature target, ValueProp props, Creature? dealer)
     {
+        // Every player's relic hears every hit; in co-op the other Luke's must leave this one's blocker alone.
+        if (target != player.Creature)
+        {
+            return;
+        }
         _pending = null;
-        if (target != player.Creature || dealer is not { IsEnemy: true } || !props.IsPoweredAttack() || !Board.UsesLanes(player))
+        if (dealer is not { IsEnemy: true } || !props.IsPoweredAttack() || !Board.UsesLanes(player))
         {
             return;
         }

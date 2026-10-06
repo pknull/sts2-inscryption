@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Monsters;
 
@@ -120,11 +121,12 @@ public static class Sigils
         }
     }
 
-    // Totems played this combat, per combat (a new combat state starts with none).
-    private static readonly ConditionalWeakTable<ICombatState, List<(Tribe Tribe, Sigil Sigil)>> Totems = new();
+    // Totems played this combat, per combat (a new combat state starts with none). A Totem serves the creatures of
+    // the Luke who played it; in co-op the other Luke's tribe is untouched.
+    private static readonly ConditionalWeakTable<ICombatState, List<(Player Owner, Tribe Tribe, Sigil Sigil)>> Totems = new();
 
-    public static void AddTotem(ICombatState combatState, Tribe tribe, Sigil sigil) =>
-        Totems.GetOrCreateValue(combatState).Add((tribe, sigil));
+    public static void AddTotem(ICombatState combatState, Player owner, Tribe tribe, Sigil sigil) =>
+        Totems.GetOrCreateValue(combatState).Add((owner, tribe, sigil));
 
     /// <summary>Does this creature of ours have the sigil, from its card or from a Totem of its tribe?</summary>
     public static bool Has(Creature creature, Sigil sigil)
@@ -137,24 +139,27 @@ public static class Sigils
         {
             return true;
         }
-        return FromTotem(creature.CombatState, board.Stats.Tribe, sigil);
+        return FromTotem(creature.CombatState, creature.PetOwner, board.Stats.Tribe, sigil);
     }
 
     /// <summary>Does this creature card have the sigil, printed or from a Totem? (Corpse Eater acts from the hand.)</summary>
     public static bool CardHas(CardModel card, Sigil sigil) =>
         card is Cards.ICreatureCard creature
-        && (creature.Stats.Sigils.Contains(sigil) || FromTotem(card.Owner?.Creature.CombatState, creature.Stats.Tribe, sigil));
+        && (creature.Stats.Sigils.Contains(sigil)
+            || FromTotem(card.Owner?.Creature.CombatState, card.Owner, creature.Stats.Tribe, sigil));
 
-    private static bool FromTotem(ICombatState? combatState, Tribe tribe, Sigil sigil) =>
-        combatState != null && Totems.TryGetValue(combatState, out var totems)
-        && totems.Any(t => t.Sigil == sigil && (tribe & t.Tribe) != 0);
+    private static bool FromTotem(ICombatState? combatState, Player? owner, Tribe tribe, Sigil sigil) =>
+        combatState != null && owner != null && Totems.TryGetValue(combatState, out var totems)
+        && totems.Any(t => t.Owner == owner && t.Sigil == sigil && (tribe & t.Tribe) != 0);
 
     public static IEnumerable<Sigil> All(Creature creature) => Implemented.Where(s => Has(creature, s));
 
     /// <summary>The lanes a creature strikes: its own, or its neighbours (Bifurcated), or all three (Trifurcated).</summary>
-    public static IEnumerable<int> StrikeLanes(Creature creature)
+    public static IEnumerable<int> StrikeLanes(Creature creature) => StrikeLanes(creature, Board.LaneOf(creature));
+
+    /// <summary>The same from <paramref name="lane"/>, for the UI's read-only lane.</summary>
+    public static IEnumerable<int> StrikeLanes(Creature creature, int lane)
     {
-        int lane = Board.LaneOf(creature);
         int[] offsets = Has(creature, Sigil.TrifurcatedStrike) ? [-1, 0, 1]
             : Has(creature, Sigil.BifurcatedStrike) ? [-1, 1] : [0];
         return lane < 0 ? [] : offsets.Select(o => lane + o).Where(l => l >= 0 && l < Board.LaneCount);

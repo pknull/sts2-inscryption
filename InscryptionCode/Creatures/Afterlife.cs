@@ -11,8 +11,9 @@ namespace Inscryption.InscryptionCode.Creatures;
 
 /// <summary>
 /// What follows when one of the player's creatures dies, sacrificed or killed: Bones (four with Bone King), Ouroboros
-/// growing, Unkillable returning to the hand. Only a creature killed in combat (not sacrificed) lets something into
-/// its lane: Frozen Away releases an Opossum, else a Corpse Eater in the hand takes the lane for free.
+/// growing, Unkillable returning to the hand, a Cockroach infesting the deck. Only a creature killed in combat (not
+/// sacrificed) lets something into its lane: Frozen Away releases an Opossum, else a Corpse Eater in the hand takes
+/// the lane for free.
 /// </summary>
 public static class Afterlife
 {
@@ -33,6 +34,10 @@ public static class Afterlife
         {
             await ReturnToHand(owner, board);
         }
+        if (board is CockroachCreature)
+        {
+            await Infest(owner);
+        }
 
         int lane = Board.LaneOf(creature);
         if (Sacrifice.WasSacrificed(creature) || lane < 0)
@@ -51,6 +56,16 @@ public static class Afterlife
             eater.PlayFreeInto(lane);
             await CardCmd.AutoPlay(choiceContext, (CardModel)eater, null);
         }
+    }
+
+    /// <summary>
+    /// A dead Cockroach adds a curse Cockroach to the deck for good: a new card, never a copy of the one that died, so
+    /// upgrades and buffs on that card don't breed.
+    /// </summary>
+    private static async Task Infest(Player owner)
+    {
+        var curse = owner.RunState.CreateCard(ModelDb.Card<CockroachCurse>(), owner);
+        CardCmd.PreviewCardPileAdd(await CardPileCmd.Add(curse, PileType.Deck));
     }
 
     /// <summary>Unkillable: a copy of the summoning card (campfire bonuses and all) goes to the hand.</summary>

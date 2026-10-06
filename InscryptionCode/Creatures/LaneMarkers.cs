@@ -62,20 +62,24 @@ internal static class LaneMarkers
 
     public static void Refresh(NCombatRoom room)
     {
-        if (LaneContext(room) is not { } context)
+        var state = room.CreatureNodes.Select(n => n.Entity.CombatState).FirstOrDefault(s => s != null);
+        // Every Luke's creatures carry lane badges (co-op shows the other Luke's too); the enemies' are shared.
+        if (state == null || !state.Players.Any(Board.UsesLanes))
         {
             return;
         }
-        var (state, me) = context;
-        var creatures = Board.Creatures(me);
-        var enemies = Board.Enemies(state);
+        var creatures = state.Players.Where(Board.UsesLanes).SelectMany(Board.Shown.Creatures).ToList();
+        var enemies = Board.Shown.Enemies(state);
         foreach (var node in room.CreatureNodes)
         {
             bool own = creatures.Contains(node.Entity);
-            int lane = own || enemies.Contains(node.Entity) ? Board.LaneOf(node.Entity) : -1;
+            int lane = own || enemies.Contains(node.Entity) ? Board.Shown.LaneOf(node.Entity) : -1;
             SetBadge(node, lane, ownCreature: own);
         }
-        MarkEmptySlots(room, me, creatures);
+        if (LaneContext(room) is { } context)
+        {
+            MarkEmptySlots(room, context.Me, Board.Shown.Creatures(context.Me));
+        }
     }
 
     private static void MarkEmptySlots(NCombatRoom room, Player me, List<Creature> creatures)
@@ -87,6 +91,10 @@ internal static class LaneMarkers
         }
         for (int lane = 0; lane < Board.LaneCount; lane++)
         {
+            if (BoardLayout.Slot(room, me, lane) is not { } slot)
+            {
+                continue;
+            }
             var marker = parent.GetNodeOrNull<Label>(EmptySlotName + lane);
             if (marker == null)
             {
@@ -98,9 +106,8 @@ internal static class LaneMarkers
                 parent.AddChild(marker);
             }
             // Same spot as an occupant's badge: above the top-left of the slot.
-            marker.Position = BoardLayout.SlotLocal(ownerNode, lane)
-                + new Vector2(-BoardLayout.SlotWidth * 0.5f, -BoardLayout.SlotHeight - 36f);
-            marker.Visible = !creatures.Any(c => Board.LaneOf(c) == lane);
+            marker.Position = slot + new Vector2(-BoardLayout.SlotWidth * 0.5f, -BoardLayout.SlotHeight - 36f);
+            marker.Visible = !creatures.Any(c => Board.Shown.LaneOf(c) == lane);
         }
     }
 
@@ -133,7 +140,7 @@ internal static class LaneMarkers
             return;
         }
         var (state, me) = current;
-        foreach (var creature in new[] { Board.CreatureInLane(me, lane), Board.EnemyInLane(state, lane) })
+        foreach (var creature in new[] { Board.Shown.CreatureInLane(me, lane), Board.Shown.EnemyInLane(state, lane) })
         {
             if (creature != null && room.GetCreatureNode(creature) is { } node)
             {
@@ -196,13 +203,13 @@ internal static class LaneMarkers
     /// <summary>Who sits across the lane: your creature's enemy, or the enemy's blocker (you if the lane is empty).</summary>
     private static Creature? Partner(Creature hovered, ICombatState state, Player me)
     {
-        if (Board.Creatures(me).Contains(hovered))
+        if (Board.Shown.Creatures(me).Contains(hovered))
         {
-            return Board.EnemyInLane(state, Board.LaneOf(hovered));
+            return Board.Shown.EnemyInLane(state, Board.Shown.LaneOf(hovered));
         }
-        if (Board.Enemies(state).Contains(hovered))
+        if (Board.Shown.Enemies(state).Contains(hovered))
         {
-            return Board.CreatureInLane(me, Board.LaneOf(hovered)) ?? me.Creature;
+            return Board.Shown.CreatureInLane(me, Board.Shown.LaneOf(hovered)) ?? me.Creature;
         }
         return null;
     }

@@ -41,9 +41,10 @@ public abstract class BoardCreature : CustomMonsterModel
         {
             return 0;
         }
-        int lane = Board.LaneOf(Creature);
+        // Read by the intent display too, so it only reads lanes (a summon hands its creature a lane at once).
+        int lane = Board.Shown.LaneOf(Creature);
         return lane < 0 ? 0 : new[] { lane - 1, lane + 1 }
-            .Select(l => Board.CreatureInLane(Creature.PetOwner, l))
+            .Select(l => Board.Shown.CreatureInLane(Creature.PetOwner, l))
             .Count(c => c != null && Sigils.Has(c, Sigil.Leader));
     }
 
@@ -78,7 +79,8 @@ public abstract class BoardCreature : CustomMonsterModel
     private MoveState? _strike;
     private MoveState? _multiStrike;
 
-    private int Strikes => Creature == null ? 1 : Sigils.StrikeLanes(Creature).Count();
+    // Shown in the intent, so it only reads the lane.
+    private int Strikes => Creature == null ? 1 : Sigils.StrikeLanes(Creature, Board.Shown.LaneOf(Creature)).Count();
 
     /// <summary>A multi-hit intent whose damage is read live (the base class only takes a fixed number).</summary>
     private sealed class StrikesIntent : MultiAttackIntent
