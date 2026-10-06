@@ -607,6 +607,21 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   `.pck` holds only `Inscryption/` and `.godot/`. `um publish check` flags the build's own files because the
   same files are deployed in `<game>/mods/Inscryption/`; those FAILs are expected.
 
+### The Scale replaces the Side Deck (2026-10-06, Keeper's call)
+
+- The Keeper expected the Scale to be Luke's starting relic, not a buff beside the Side Deck. `Relics/Scale.cs` is now
+  the starter: the lifesteal (half the HP a hit takes off an enemy, rounded down, from Luke or his creatures) plus
+  everything the Side Deck carried (Bones and death sigils, lane blocking, enemy lanes, HitLog, the Campfire
+  option). No Squirrel per turn. `ScalePower` and the Side Deck relic, art and text are gone; the scale art is now
+  the relic icon (94 + outline + 256). Runs saved with the Side Deck load it as the game's Deprecated relic and
+  lose those rules; the Keeper waived save compatibility.
+- Squirrel: no Exhaust (the deck's Squirrels cycle) and Common rarity, so more can be taken from rewards or bought.
+- Keeper's playtest after the change, Act 1 weak fights: Toadpoles 6 turns, 9 Squirrel plays (5 died blocking),
+  HP lost 6, all healed by the Scale; Sludge Spinner 3 turns, one Adder; Seapunk 5 turns, two Adders, HP lost 8,
+  all healed. HP costs nothing early; the squeeze shows as fight length, since a 2-Blood creature eats both
+  Squirrels. The Keeper keeps it tight: rewards and the shop loosen it over a run.
+- Released as v0.2.1 (pre-release).
+
 ### Gotchas found in game
 
 1. Mod-loading popup: choosing "load mods" saves `PlayerAgreedToModLoading` and calls `NGame.Quit()`

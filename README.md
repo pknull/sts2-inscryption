@@ -32,10 +32,9 @@ Ironclad and Luke unlocked.
 ## How Luke plays
 
 - **Starting deck:** 4 Strike, 4 Defend, 2 Squirrel. More creatures join through card rewards, like any other
-  character's cards.
-- **Side Deck (starting relic):** a Squirrel arrives in your hand each turn, 10 per combat.
-- **The Scale:** Luke heals half the HP that he and his creatures take from enemies (Block and overkill don't
-  count).
+  character's cards; Squirrels, the free sacrifices, are Common cards you can pick up or buy.
+- **The Scale (starting relic):** Luke heals half the HP that he and his creatures take from enemies (Block and
+  overkill don't count).
 - **Creature cards are Skills and cost no energy.** They cost a sacrifice (creatures already on your board) or
   Bones (gained whenever one of your creatures dies).
 - **Lanes:** drag a creature card to a lane (an empty slot, or the enemy facing it) to summon it there. If that

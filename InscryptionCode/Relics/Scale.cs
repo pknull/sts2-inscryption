@@ -1,51 +1,32 @@
-using Inscryption.InscryptionCode.Cards;
 using Inscryption.InscryptionCode.Creatures;
-using Inscryption.InscryptionCode.Powers;
 using Inscryption.InscryptionCode.RestSite;
 using MegaCrit.Sts2.Core.Entities.RestSite;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
-using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace Inscryption.InscryptionCode.Relics;
 
 /// <summary>
-/// Starting relic carrying Inscryption's economy: the Squirrel side deck (one Squirrel into your hand each turn,
-/// ten per combat), the scale (<see cref="ScalePower"/>) and what follows a creature's death: Bones and the death
-/// sigils (<see cref="Afterlife"/>).
+/// Luke's starting relic, Inscryption's scale: health tips with the damage each side deals, so Luke heals half of the
+/// HP that he and his creatures take from enemies (rounded down per hit; Block and overkill don't count). It also
+/// carries the board's rules: lane blocking, enemy lanes, Bones and the death sigils (<see cref="Afterlife"/>), and
+/// the Campfire rest option.
 /// </summary>
-public sealed class SideDeck : InscryptionRelic
+public sealed class Scale : InscryptionRelic
 {
-    private int _squirrelsLeft;
-
     public override RelicRarity Rarity => RelicRarity.Starter;
 
-    protected override IEnumerable<DynamicVar> CanonicalVars => [new CardsVar(Balance.SideDeckSize)];
-
-    private int SquirrelsLeft
+    public override Task BeforeCombatStart()
     {
-        get => _squirrelsLeft;
-        set
-        {
-            AssertMutable();
-            _squirrelsLeft = value;
-        }
-    }
-
-    public override async Task BeforeCombatStart()
-    {
-        SquirrelsLeft = Balance.SideDeckSize;
         HitLog.Reset();
         LaneEnemies(Owner.Creature.CombatState);
-        // The scale: Luke heals half the damage he and his creatures deal.
-        await PowerCmd.Apply<ScalePower>(new ThrowingPlayerChoiceContext(), Owner.Creature, 1m, Owner.Creature, null);
+        return Task.CompletedTask;
     }
 
     // Enemy lanes are handed out here, at fixed points of the combat, so every player's game agrees on them: at the
@@ -63,18 +44,6 @@ public sealed class SideDeck : InscryptionRelic
     {
         Board.Enemies(combatState);
         BoardLayout.Refresh();
-    }
-
-    public override async Task AfterPlayerTurnStart(PlayerChoiceContext choiceContext, Player player)
-    {
-        if (player != Owner || SquirrelsLeft <= 0 || Owner.Creature.CombatState == null)
-        {
-            return;
-        }
-        SquirrelsLeft--;
-        Flash();
-        var squirrel = Owner.Creature.CombatState.CreateCard<Squirrel>(Owner);
-        await CardPileCmd.AddGeneratedCardToCombat(squirrel, PileType.Hand, Owner);
     }
 
     public override bool TryModifyRestSiteOptions(Player player, ICollection<RestSiteOption> options)
@@ -113,10 +82,28 @@ public sealed class SideDeck : InscryptionRelic
         return Task.CompletedTask;
     }
 
-    // Reported for every result, killed targets included (AfterDamageReceived skips those).
-    public override Task AfterDamageGiven(PlayerChoiceContext choiceContext, Creature? dealer, DamageResult result, ValueProp props, Creature target, CardModel? cardSource)
+    // Reported for every result, killed targets included (AfterDamageReceived skips those). Every player's relic
+    // hears every hit: the scale heals only for this Luke's own damage and his creatures'.
+    public override async Task AfterDamageGiven(PlayerChoiceContext choiceContext, Creature? dealer, DamageResult result, ValueProp props, Creature target, CardModel? cardSource)
     {
         HitLog.After(result);
-        return Task.CompletedTask;
+        var luke = Owner.Creature;
+        if (dealer == null || (dealer != luke && dealer.PetOwner != Owner) || !result.Receiver.IsEnemy || luke.IsDead)
+        {
+            return;
+        }
+        int heal = result.UnblockedDamage / 2;
+        if (heal <= 0)
+        {
+            return;
+        }
+        int before = luke.CurrentHp;
+        if (before < luke.MaxHp)
+        {
+            Flash();
+        }
+        await CreatureCmd.Heal(luke, heal);
+        MainFile.Logger.Info($"Scale: {dealer.Monster?.Id.Entry ?? "Luke"} took {result.UnblockedDamage} HP from {result.Receiver.Monster?.Id.Entry}; Luke heals {heal}, HP {before} -> {luke.CurrentHp}");
     }
 }
+

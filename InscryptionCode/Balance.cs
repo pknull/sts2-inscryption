@@ -17,8 +17,6 @@ public static class Balance
     /// <summary>Inscryption's board has four lanes.</summary>
     public const int MaxCreatures = 4;
 
-    /// <summary>Squirrels in the side deck per combat.</summary>
-    public const int SideDeckSize = 10;
 
     /// <summary>
     /// Does a blocker soak the whole hit (Inscryption), or only up to its HP with the rest reaching the player (the

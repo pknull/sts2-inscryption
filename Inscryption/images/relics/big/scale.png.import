@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://5nxcfkgc7hub"
-path="res://.godot/imported/scale_power.png-561d54c5bc2de64cc0199dee129439fb.ctex"
+uid="uid://cekdjlaqla85t"
+path="res://.godot/imported/scale.png-289ed2afcf7a6fbc18d484a9a08be85a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Inscryption/images/powers/big/scale_power.png"
-dest_files=["res://.godot/imported/scale_power.png-561d54c5bc2de64cc0199dee129439fb.ctex"]
+source_file="res://Inscryption/images/relics/big/scale.png"
+dest_files=["res://.godot/imported/scale.png-289ed2afcf7a6fbc18d484a9a08be85a.ctex"]
 
 [params]
 

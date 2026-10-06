@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dgac16vjh3fy2"
-path="res://.godot/imported/side_deck_outline.png-1e211b41fb0575422540d00f462b9493.ctex"
+uid="uid://15lvmbfgbg5i"
+path="res://.godot/imported/scale.png-6ccb2368476d8f8489ea0110ed742b80.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Inscryption/images/relics/side_deck_outline.png"
-dest_files=["res://.godot/imported/side_deck_outline.png-1e211b41fb0575422540d00f462b9493.ctex"]
+source_file="res://Inscryption/images/relics/scale.png"
+dest_files=["res://.godot/imported/scale.png-6ccb2368476d8f8489ea0110ed742b80.ctex"]
 
 [params]
 

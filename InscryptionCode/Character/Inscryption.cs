@@ -20,7 +20,7 @@ public class Inscryption : PlaceholderCharacterModel
     public override CharacterGender Gender => CharacterGender.Masculine;
     public override int StartingHp => 70;
     
-    // Two Squirrels to start; the SideDeck relic adds one more each turn.
+    // Squirrels come only from the deck: two to start.
     public override IEnumerable<CardModel> StartingDeck => [
         ModelDb.Card<Strike>(),
         ModelDb.Card<Strike>(),
@@ -36,7 +36,7 @@ public class Inscryption : PlaceholderCharacterModel
 
     public override IReadOnlyList<RelicModel> StartingRelics =>
     [
-        ModelDb.Relic<SideDeck>()
+        ModelDb.Relic<Scale>()
     ];
     
     public override CardPoolModel CardPool => ModelDb.CardPool<InscryptionCardPool>();

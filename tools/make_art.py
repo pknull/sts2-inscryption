@@ -176,24 +176,22 @@ def totems() -> None:
 
 
 def icons() -> None:
-    """Bones, Creature and Scale power icons, Side Deck relic icon."""
+    """Bones and Creature power icons, Scale relic icon."""
     powers, relics = IMAGES / "powers", IMAGES / "relics"
     (powers / "big").mkdir(parents=True, exist_ok=True)
     (relics / "big").mkdir(parents=True, exist_ok=True)
-    for power_id, source in {"bones_power": "icon_bones_cut", "creature_power": "icon_paw_cut",
-                             "scale_power": "icon_scale_cut"}.items():
+    for power_id, source in {"bones_power": "icon_bones_cut", "creature_power": "icon_paw_cut"}.items():
         cut = Image.open(GEN / f"{source}.png").convert("RGBA")
         icon(cut, 64).save(powers / f"{power_id}.png")
         icon(cut, 256).save(powers / "big" / f"{power_id}.png")
-    cut = Image.open(GEN / "icon_side_deck_cut.png").convert("RGBA")
+    cut = Image.open(GEN / "icon_scale_cut.png").convert("RGBA")
     small = icon(cut, 94, margin=0.1)
-    small.save(relics / "side_deck.png")
-    outline(small).save(relics / "side_deck_outline.png")
-    icon(cut, 256).save(relics / "big" / "side_deck.png")
+    small.save(relics / "scale.png")
+    outline(small).save(relics / "scale_outline.png")
+    icon(cut, 256).save(relics / "big" / "scale.png")
     (IMAGES / "ui").mkdir(parents=True, exist_ok=True)
     icon(Image.open(GEN / "icon_campfire_cut.png").convert("RGBA"), 256).save(IMAGES / "ui" / "rest_site_campfire.png")
-    print("icons: bones_power, creature_power, scale_power (64 + 256), side_deck relic (94 + outline + 256), "
-          "campfire rest option")
+    print("icons: bones_power, creature_power (64 + 256), scale relic (94 + outline + 256), campfire rest option")
 
 
 def main() -> None:
