@@ -597,7 +597,15 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   half the HP each hit takes from an enemy (Strike 5 heals 2, a 3-damage strike heals 1, capped at max HP), logged
   as `Scale: ...`; a Mantis God in lane 4 struck only the lane-3 slime, once; Mole Man needs two sacrifices; Geck
   shows blue; every creature card is a Skill; a dead Cockroach adds a curse `CockroachCurse` to the deck, which plays
-  and breeds again. Scale icon is the template placeholder pending fal art.
+  and breeds again.
+- Scale icon (Keeper's go-ahead): one `um fal edit --ref stoat_flat_probe.png` (1:1, 1K, $0.08) of a brass balance
+  scale tipped by teeth in its left pan, `um fal rmbg`, then `make_art.py icons()` writes `scale_power.png` (64 and
+  256); `ScalePower` uses the default icon path. Re-running `icons()` left the other icons byte-identical.
+- Release v0.2.0 (pre-release, `Inscryption-v0.2.0.zip`, same four-file layout as v0.1.0). Gotcha found before
+  shipping: Godot's `all_resources` export packs any `.json` under the project, and it had picked up
+  `Work/session-state/*.json`. `export_presets.cfg` now also excludes `Work/*` and `Memory/*`; checked that the
+  `.pck` holds only `Inscryption/` and `.godot/`. `um publish check` flags the build's own files because the
+  same files are deployed in `<game>/mods/Inscryption/`; those FAILs are expected.
 
 ### Gotchas found in game
 
@@ -617,8 +625,6 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
 
 ## Next
 
-- Push the co-op and rules commit on the Keeper's word; its message closes #1-#11.
-- Scale icon: one fal image plus cutout, on the Keeper's go-ahead.
 - Play a run with HitLog live and split each elite and boss fight's damage: blocker HP, Luke's Block, open lanes.
 - Then a lever for Act 2 hits (creature HP by act, or cheaper creature HP); offense if fights drag.
 - Luke has no non-Basic Attacks now: Inscryption-flavoured non-creature cards; sigil batch 3.

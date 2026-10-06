@@ -1,4 +1,3 @@
-using Inscryption.InscryptionCode.Extensions;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
@@ -18,10 +17,6 @@ public sealed class ScalePower : InscryptionPower
     public override PowerType Type => PowerType.Buff;
     public override PowerStackType StackType => PowerStackType.Single;
     public override bool ShouldPlayVfx => false;
-
-    // Placeholder icon until the scale art is made.
-    public override string CustomPackedIconPath => "power.png".PowerImagePath();
-    public override string CustomBigIconPath => "power.png".BigPowerImagePath();
 
     // Every listener hears every hit: heal only for this Luke's own damage and his creatures'.
     public override async Task AfterDamageGiven(PlayerChoiceContext choiceContext, Creature? dealer, DamageResult result, ValueProp props, Creature target, CardModel? cardSource)
