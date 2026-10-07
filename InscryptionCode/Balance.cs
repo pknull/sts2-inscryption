@@ -1,3 +1,4 @@
+using Inscryption.InscryptionCode.Creatures;
 using MegaCrit.Sts2.Core.Entities.Cards;
 
 namespace Inscryption.InscryptionCode;
@@ -7,14 +8,37 @@ namespace Inscryption.InscryptionCode;
 /// </summary>
 public static class Balance
 {
-    /// <summary>Inscryption power is multiplied by this (a 1-power Stoat hits for 2).</summary>
-    public const int PowerScale = 2;
+    // Creatures are priced like cards (Keeper, 2026-10-07): a Blood (sacrifice) is worth an energy, and each energy of
+    // a creature's cost buys a full Attack's worth AND a full Block's worth, as vanilla's lasting effects do (Zap: a
+    // Lightning orb dealing 3 a turn, plus its evoke; Glacier: Block plus Frost). One energy of a lasting strike is the
+    // Lightning orb's 3 a turn; one energy of HP is a card's 6 Block. Inscryption's Commons average 1 Power and 1.5
+    // Health per Blood, hence x3 and x4; Inscryption's own stat lines keep each creature's shape and sigil discount.
+
+    /// <summary>Inscryption power is multiplied by this (a 1-power Stoat hits for 3).</summary>
+    public const int PowerScale = 3;
+
+    /// <summary>Inscryption health is multiplied by this (a 3-health Stoat has 12 HP).</summary>
+    public const int HealthScale = 4;
+
+    /// <summary>Damage per turn that each energy of a creature card's cost buys, spread over the lanes it strikes.</summary>
+    public const int DamagePerEnergy = 3;
+
+    /// <summary>HP that each energy of a creature card's cost buys.</summary>
+    public const int HealthPerEnergy = 6;
 
     /// <summary>
-    /// Inscryption health is multiplied by this (a 3-health Stoat has 6 HP). Lowered from x5 with the energy costs
-    /// (Keeper, 2026-10-06, #15): at x5 one large blocker held a lane for the whole fight.
+    /// A creature's damage per strike for <paramref name="power"/> Inscryption Power, with the energy its card costs
+    /// (<paramref name="energy"/>). A creature with no power doesn't strike, so the energy buys it none.
     /// </summary>
-    public const int HealthScale = 2;
+    public static int Damage(int power, CreatureStats stats, int energy) =>
+        power <= 0 ? 0 : power * PowerScale + (int)Math.Round((decimal)DamagePerEnergy * energy / LanesStruck(stats),
+            MidpointRounding.AwayFromZero);
+
+    /// <summary>A creature's HP for <paramref name="health"/> Inscryption Health, with its card's energy cost.</summary>
+    public static int Health(int health, int energy) => health * HealthScale + HealthPerEnergy * energy;
+
+    private static int LanesStruck(CreatureStats stats) =>
+        stats.Sigils.Contains(Sigil.TrifurcatedStrike) ? 3 : stats.Sigils.Contains(Sigil.BifurcatedStrike) ? 2 : 1;
 
     /// <summary>
     /// A creature card's energy cost, on top of its Blood or Bones (Keeper, 2026-10-06, #15): Commons and tokens are

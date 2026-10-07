@@ -86,8 +86,57 @@ def print_photo() -> Image.Image:
     return img
 
 
+def drop(size: int, ring: bool = False) -> Image.Image:
+    """A blood drop (Luke's energy: Blood, Keeper 2026-10-07), drawn 4x and scaled down for smooth edges."""
+    k = 4
+    n = size * k
+    img = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    cx, r = n / 2, n * 0.30
+    cy = n * 0.62
+    tip = n * 0.08
+    outline = (40, 6, 8, 255)
+    w = max(k, n // 28)
+    d.polygon([(cx, tip), (cx - r * 0.92, cy - r * 0.38), (cx + r * 0.92, cy - r * 0.38)], fill=outline)
+    d.ellipse([cx - r - w, cy - r - w, cx + r + w, cy + r + w], fill=outline)
+    d.polygon([(cx, tip + w * 1.6), (cx - r * 0.86, cy - r * 0.36), (cx + r * 0.86, cy - r * 0.36)], fill=(150, 14, 20, 255))
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(150, 14, 20, 255))
+    d.ellipse([cx - r * 0.78, cy - r * 0.62, cx + r * 0.62, cy + r * 0.82], fill=(196, 28, 34, 255))
+    d.ellipse([cx - r * 0.55, cy - r * 0.55, cx - r * 0.15, cy - r * 0.05], fill=(255, 196, 190, 220))
+    return img.resize((size, size), Image.Resampling.LANCZOS)
+
+
+def counter_layer(layer: int) -> Image.Image:
+    """The five layers BaseLib stacks into an energy counter (128 px; layers 2 and 3 rotate)."""
+    n = 128 * 4
+    img = Image.new("RGBA", (n, n), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    if layer == 1:
+        d.ellipse([40, 40, n - 40, n - 40], fill=(28, 8, 10, 235), outline=(90, 18, 22, 255), width=14)
+    elif layer == 2:
+        for i in range(12):
+            a = i * 30
+            box = [24, 24, n - 24, n - 24]
+            d.arc(box, a, a + 14, fill=(150, 30, 34, 200), width=10)
+    elif layer == 4:
+        img.alpha_composite(drop(n).resize((int(n * 0.78), int(n * 0.78)), Image.Resampling.LANCZOS),
+                            (int(n * 0.11), int(n * 0.08)))
+    return img.resize((128, 128), Image.Resampling.LANCZOS)
+
+
+def blood() -> None:
+    """Luke's energy shown as Blood: the card cost icon, the icon in card text and the energy counter."""
+    ui = IMAGES / "charui"
+    drop(74).save(ui / "big_energy.png")
+    drop(24).save(ui / "text_energy.png")
+    for layer in range(1, 6):
+        counter_layer(layer).save(ui / f"energy_counter_{layer}.png")
+
+
 def main() -> None:
     made = []
+    blood()
+    made.append("blood (energy icons and counter)")
     sprite = IMAGES / "creatures" / "hooked_creature.png"
     if not sprite.exists():
         print_photo().save(sprite)

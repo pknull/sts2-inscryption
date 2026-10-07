@@ -36,10 +36,11 @@ public sealed class FishHook() : InscryptionCard(2, CardType.Skill, CardRarity.R
             MainFile.Logger.Info($"Fish Hook: {cardPlay.Target?.Monster?.Id.Entry} slipped free");
             return;
         }
-        // Inscryption Power 1-4 (2-8 damage per strike), Health 2-6 (4-12 HP).
-        decimal hit = monster.NextMove?.Intents.OfType<AttackIntent>().FirstOrDefault()?.DamageCalc?.Invoke() ?? 4m;
-        int power = Math.Clamp((int)Math.Ceiling(hit / 4m), 1, 4);
-        int health = Math.Clamp((target.CurrentHp + 1) / 2, 2, 6);
+        // In Inscryption units, Power 1-3 from its hit and Health 1-5 from its HP, then priced like any 1-energy,
+        // 2-Blood creature: a Nibbit hitting 12 at 18 HP becomes 9/18 (Balance.Damage, Balance.Health).
+        decimal hit = monster.NextMove?.Intents.OfType<AttackIntent>().FirstOrDefault()?.DamageCalc?.Invoke() ?? 6m;
+        int power = Math.Clamp((int)Math.Round(hit / 6m, MidpointRounding.AwayFromZero), 1, 3);
+        int health = Math.Clamp((int)Math.Round(target.CurrentHp / 6m, MidpointRounding.AwayFromZero), 1, 5);
         int caught = Owner.Deck.Cards.Count(c => c is HookedCard);
         string key = $"{Owner.RunState.Rng.StringSeed}-{Owner.RunState.TotalFloor}-{monster.Id.Entry.ToLowerInvariant()}-{caught}";
 

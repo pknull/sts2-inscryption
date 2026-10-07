@@ -675,6 +675,28 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   "card INSC_KNIFE"); one command per opening is reliable. `energy` adds and refuses negatives. A game killed with
   SIGTERM after Save and Quit hung on an X error; SIGKILL closed it (the save had landed).
 
+### Creatures priced like cards; energy shown as Blood (2026-10-07, Keeper's calls, agent driving)
+
+- The Keeper: price creatures the way vanilla prices Attack and Block cards. Survey of the five pools (decompile):
+  damage follows energy (Common 1-cost median 8, 2-cost 12, 3-cost 18-27), rarity buys effects not numbers (Rare
+  1-cost median 9.5), Block about 6 per energy, upgrades +3 (141 damage, 57 Block). Lasting effects are priced per
+  turn: Zap's Lightning orb deals 3 a turn plus its evoke; Glacier gives Block plus Frost; Bodyguard summons 5 HP.
+- Keeper's calls: a Blood (sacrifice) is worth an energy; each energy of a creature's cost buys a full Attack's
+  worth AND a full Block's worth ("both", over "split", where one energy bought either); Luke's energy is shown as
+  Blood, a name and art change only (option 2, sacrifices adding Blood to one shared pool, was deferred).
+- Built: `Balance.PowerScale` 3, `HealthScale` 4 (Inscryption's Commons average 1 Power and 1.5 Health per Blood);
+  `Balance.Damage` / `Balance.Health` add 3 damage a turn (spread over the lanes struck) and 6 HP per energy the card
+  costs (`BoardCreature.Energy` = the card's canonical cost). Stoat 3/12, Wolf 9/8, Grizzly 12/24, Bloodhound 9/18,
+  Mantis God 5/16 x3 lanes, Urayuli 27/40, Mole Man 0/36. Smith's Blood -1 stays the upgrade: it refunds an energy,
+  as vanilla cost-down upgrades do. Leader, Stinky and Sharp Quills texts say 3 again, matching x3 (they had been off
+  at x2 in v0.3). Fish Hook catches now map hit/6 to Power 1-3 and HP/6 to Health 1-5, priced as 1 energy + 2 Blood
+  (a Nibbit hitting 12 at 18 HP: 9/18).
+- Blood art (local placeholder, `tools/placeholder_art.py blood()`): a drop for the card cost (`charui/big_energy`),
+  the text icon, and BaseLib's five-layer `CustomEnergyCounter` (`charui/energy_counter_1-5`).
+- Verified in game (account 4242): blood cost icons on every card, blood counter 3/3; Ring Worm 0/4; Stoat 3/12,
+  Bloodhound 9/18, Mantis God 5/16, Urayuli 27/40 on the cards; a summoned Stoat 12/12 with a 3 intent, Squirrel
+  4/4. No exceptions.
+
 ### Gotchas found in game
 
 1. Mod-loading popup: choosing "load mods" saves `PlayerAgreedToModLoading` and calls `NGame.Quit()`

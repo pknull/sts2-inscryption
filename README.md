@@ -33,10 +33,14 @@ Ironclad and Luke unlocked.
 
 - **Starting deck:** 5 Strike, 5 Defend. More creatures join through card rewards, like any other character's
   cards.
+- **Blood:** Luke's energy is shown as Blood (blood drops on his cards and counter); it works as energy does.
 - **The Side Deck (starting relic):** a Squirrel, the free sacrifice, comes into your hand at the start of each turn
   (ten per combat). It is Ethereal: play it that turn or lose it.
 - **Creature cards are Skills.** They cost a sacrifice (creatures already on your board) or Bones (gained whenever
-  one of your creatures dies), plus energy by rarity: Commons nothing, Uncommons 1, Rares 2.
+  one of your creatures dies), plus Blood by rarity: Commons nothing, Uncommons 1, Rares 2.
+- **Creatures are priced like cards:** a sacrifice counts as one Blood, and every Blood a creature costs buys both a
+  lasting strike (about 3 damage a turn) and HP (about 6), on Inscryption's own stat lines (Stoat 3/12, Wolf 9/8,
+  Bloodhound 9/18, Urayuli 27/40).
 - **Lanes:** drag a creature card to a lane (an empty slot, or the enemy facing it) to summon it there. If that
   lane is taken, it goes to the lowest empty lane.
 - **Blocking:** a creature takes the hits of the enemy in its lane; damage beyond its HP goes through to Luke, then
@@ -51,7 +55,7 @@ Ironclad and Luke unlocked.
 - **Sigils** from Inscryption (Airborne, Bifurcated Strike, Many Lives, Unkillable and more) are on the cards and
   explained in their tooltips. **Totems** grant a sigil to a whole tribe for the combat.
 - **Cockroaches breed:** every Cockroach that dies adds a new Cockroach curse to your deck for good.
-- **Rest sites:** Luke's Campfire option makes one creature card stronger (+2 damage per strike or +4 HP).
+- **Rest sites:** Luke's Campfire option makes one creature card stronger (+3 damage per strike or +8 HP).
 
 ## Reporting a bug
 

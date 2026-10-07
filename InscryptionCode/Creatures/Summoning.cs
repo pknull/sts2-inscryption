@@ -42,7 +42,7 @@ public static class Summoning
         board.BonusPower = powerBonus;
         board.SourceCard = source;
         board.OwnSigils.UnionWith(stats.Sigils);
-        int health = (stats.Health + healthBonus) * Balance.HealthScale;
+        int health = Balance.Health(stats.Health + healthBonus, board.Energy);
         if (health != creature.MaxHp)
         {
             await CreatureCmd.SetMaxHp(creature, health);

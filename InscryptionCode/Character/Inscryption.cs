@@ -39,6 +39,14 @@ public class Inscryption : PlaceholderCharacterModel
         ModelDb.Relic<SideDeck>()
     ];
     
+    // Luke's energy is shown as Blood (Keeper, 2026-10-07): a blood-drop counter here, blood-drop cost icons on his
+    // cards (InscryptionCardPool). It works exactly as energy does.
+    public override CustomEnergyCounter? CustomEnergyCounter =>
+        new CustomEnergyCounter(layer => $"charui/energy_counter_{layer}.png".ImagePath(), new Color("2a0608"),
+            new Color("c41c22"));
+
+    public override Color EnergyLabelOutlineColor => new("2a0608");
+
     public override CardPoolModel CardPool => ModelDb.CardPool<InscryptionCardPool>();
     public override RelicPoolModel RelicPool => ModelDb.RelicPool<InscryptionRelicPool>();
     public override PotionPoolModel PotionPool => ModelDb.PotionPool<InscryptionPotionPool>();

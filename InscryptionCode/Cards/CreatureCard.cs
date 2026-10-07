@@ -51,6 +51,7 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
     where TCreature : BoardCreature
 {
     private CreatureStats _stats = stats;
+    private readonly int _energy = energy ?? Balance.EnergyCost(rarity);
     private int _powerBonus;
     private int _healthBonus;
 
@@ -66,8 +67,8 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
         _stats = value;
         DynamicVars["Blood"].BaseValue = value.Blood;
         DynamicVars["Bones"].BaseValue = value.Bones;
-        ((StatVar)DynamicVars["Power"]).Reprint(Power, value.Power * Balance.PowerScale);
-        ((StatVar)DynamicVars["Health"]).Reprint(Health, value.Health * Balance.HealthScale);
+        ((StatVar)DynamicVars["Power"]).Reprint(Power, Balance.Damage(value.Power, value, _energy));
+        ((StatVar)DynamicVars["Health"]).Reprint(Health, Balance.Health(value.Health, _energy));
     }
 
     /// <summary>Inscryption Power added at campfires (before <see cref="Balance.PowerScale"/>).</summary>
@@ -98,8 +99,8 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
 
     private int Blood => DynamicVars["Blood"].IntValue;
     private int Bones => DynamicVars["Bones"].IntValue;
-    private int Power => (_stats.Power + _powerBonus) * Balance.PowerScale;
-    private int Health => (_stats.Health + _healthBonus) * Balance.HealthScale;
+    private int Power => Balance.Damage(_stats.Power + _powerBonus, _stats, _energy);
+    private int Health => Balance.Health(_stats.Health + _healthBonus, _energy);
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
     [
@@ -107,8 +108,8 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
         new DynamicVar("Bones", _stats.Bones),
         // Set only on the sacrifice screen's stand-in cards, so the text names the lane being given up.
         new DynamicVar("Lane", 0),
-        new StatVar("Power", Power, _stats.Power * Balance.PowerScale),
-        new StatVar("Health", Health, _stats.Health * Balance.HealthScale),
+        new StatVar("Power", Power, Balance.Damage(_stats.Power, _stats, _energy)),
+        new StatVar("Health", Health, Balance.Health(_stats.Health, _energy)),
     ];
 
     /// <summary>

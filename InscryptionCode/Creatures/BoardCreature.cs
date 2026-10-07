@@ -34,14 +34,14 @@ public abstract class BoardCreature : CustomMonsterModel
     public int SprintDirection { get; set; } = 1;
 
     /// <summary>
-    /// Damage per strike: printed Power, campfire Power, +1 for each adjacent Leader; scaled; then the owner's
-    /// Ferocity. A creature with no power doesn't strike, and Ferocity doesn't change that.
+    /// Damage per strike: printed Power, campfire Power, +1 for each adjacent Leader; scaled, plus what its card's
+    /// energy buys; then the owner's Ferocity. A creature with no power doesn't strike, and Ferocity doesn't change that.
     /// </summary>
     public int ScaledPower
     {
         get
         {
-            int power = (Stats.Power + BonusPower + AdjacentLeaders()) * Balance.PowerScale;
+            int power = Balance.Damage(Stats.Power + BonusPower + AdjacentLeaders(), Stats, Energy);
             return power > 0 ? power + FerocityPower.Of(Creature?.PetOwner) : power;
         }
     }
@@ -59,8 +59,11 @@ public abstract class BoardCreature : CustomMonsterModel
             .Count(c => c != null && Sigils.Has(c, Sigil.Leader));
     }
 
-    public override int MinInitialHp => Stats.Health * Balance.HealthScale;
-    public override int MaxInitialHp => Stats.Health * Balance.HealthScale;
+    /// <summary>The energy its card costs, which buys it extra damage and HP (<see cref="Balance"/>).</summary>
+    public int Energy => Card.EnergyCost.Canonical;
+
+    public override int MinInitialHp => Balance.Health(Stats.Health, Energy);
+    public override int MaxInitialHp => Balance.Health(Stats.Health, Energy);
 
     // Loads Inscryption/images/creatures/<creature_id>.png
     private string ArtPath => $"creatures/{Id.Entry.RemovePrefix().ToLowerInvariant()}.png".ImagePath();
