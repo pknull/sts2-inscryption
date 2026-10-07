@@ -1,5 +1,5 @@
 {
-  "INSCRYPTION-SCALE.title": "Scale",
-  "INSCRYPTION-SCALE.description": "Whenever you or your creatures damage an enemy, heal for half the HP it loses. Whenever one of your creatures dies, gain 1 [gold]Bones[/gold].",
-  "INSCRYPTION-SCALE.flavor": "Paid in teeth, one way or the other."
+  "INSCRYPTION-SIDE_DECK.title": "Side Deck",
+  "INSCRYPTION-SIDE_DECK.description": "At the start of your turn, add a [gold]Squirrel[/gold] to your hand ([blue]{Cards}[/blue] per combat). Whenever one of your creatures dies, gain 1 [gold]Bones[/gold].",
+  "INSCRYPTION-SIDE_DECK.flavor": "Ten of them, and none of them mind."
 }

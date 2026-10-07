@@ -1,11 +1,23 @@
 {
   "INSCRYPTION-CREATURE_POWER.title": "Creature",
-  "INSCRYPTION-CREATURE_POWER.description": "Takes the hits of the enemy in its lane; damage beyond its HP goes through to you. At the end of your turn, strikes that enemy, if there is one.",
-  "INSCRYPTION-CREATURE_POWER.smartDescription": "Takes the hits of the enemy in its lane; damage beyond its HP goes through to you. At the end of your turn, strikes that enemy, if there is one.",
+  "INSCRYPTION-CREATURE_POWER.description": "Takes the hits of the enemy in its lane; damage beyond its HP goes through to you. At the end of your turn, strikes the enemy in its lane, or the nearest enemy if that lane is empty.",
+  "INSCRYPTION-CREATURE_POWER.smartDescription": "Takes the hits of the enemy in its lane; damage beyond its HP goes through to you. At the end of your turn, strikes the enemy in its lane, or the nearest enemy if that lane is empty.",
   "INSCRYPTION-BONES_POWER.title": "Bones",
   "INSCRYPTION-BONES_POWER.description": "Gained whenever one of your creatures dies. Some creatures cost Bones to summon.",
   "INSCRYPTION-BONES_POWER.smartDescription": "You have [blue]{Amount}[/blue] Bones.",
   "INSCRYPTION-TOTEM_POWER.title": "Totems",
   "INSCRYPTION-TOTEM_POWER.description": "Totems stand this combat. Each gives its sigil to your creatures of its tribe.",
-  "INSCRYPTION-TOTEM_POWER.smartDescription": "[blue]{Amount}[/blue] Totems stand this combat. Each gives its sigil to your creatures of its tribe."
+  "INSCRYPTION-TOTEM_POWER.smartDescription": "[blue]{Amount}[/blue] Totems stand this combat. Each gives its sigil to your creatures of its tribe.",
+  "INSCRYPTION-FEROCITY_POWER.title": "Ferocity",
+  "INSCRYPTION-FEROCITY_POWER.description": "Each strike by your creatures deals more damage.",
+  "INSCRYPTION-FEROCITY_POWER.smartDescription": "Each strike by your creatures deals [blue]{Amount}[/blue] more damage.",
+  "INSCRYPTION-HUNTING_HORN_POWER.title": "Hunting Horn",
+  "INSCRYPTION-HUNTING_HORN_POWER.description": "Each strike by your creatures deals more damage this turn.",
+  "INSCRYPTION-HUNTING_HORN_POWER.smartDescription": "Each strike by your creatures deals [blue]{Amount}[/blue] more damage this turn.",
+  "INSCRYPTION-ALTAR_POWER.title": "The Altar",
+  "INSCRYPTION-ALTAR_POWER.description": "Whenever you sacrifice a creature, gain [gold]Block[/gold].",
+  "INSCRYPTION-ALTAR_POWER.smartDescription": "Whenever you sacrifice a creature, gain [blue]{Amount}[/blue] [gold]Block[/gold].",
+  "INSCRYPTION-BONEYARD_POWER.title": "Boneyard",
+  "INSCRYPTION-BONEYARD_POWER.description": "Whenever you gain [gold]Bones[/gold], deal damage to ALL enemies.",
+  "INSCRYPTION-BONEYARD_POWER.smartDescription": "Whenever you gain [gold]Bones[/gold], deal [blue]{Amount}[/blue] damage to ALL enemies."
 }

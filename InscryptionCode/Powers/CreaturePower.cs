@@ -6,7 +6,6 @@ using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.MonsterMoves.Intents;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -15,8 +14,8 @@ namespace Inscryption.InscryptionCode.Powers;
 
 /// <summary>
 /// Carried by every creature on the board. It does what Inscryption's board does: the creature takes attacks
-/// aimed down its lane, and strikes the enemy across its lane (if any) when the player ends the turn. Its sigils
-/// (from its card or a Totem) change how it blocks, strikes and moves.
+/// aimed down its lane, and strikes across its lane when the player ends the turn: the enemy there, or the nearest
+/// enemy if the lane is empty. Its sigils (from its card or a Totem) change how it blocks, strikes and moves.
 /// </summary>
 public sealed class CreaturePower : InscryptionPower
 {
@@ -66,42 +65,13 @@ public sealed class CreaturePower : InscryptionPower
         }
     }
 
-    // Guardian: when the enemy turn starts, moves to block an attacking enemy whose lane is empty.
-    public override Task BeforeSideTurnStart(PlayerChoiceContext choiceContext, CombatSide side, IReadOnlyList<Creature> participants, ICombatState combatState)
-    {
-        if (side != CombatSide.Enemy || Owner.IsDead || !Has(Sigil.Guardian) || Owner.PetOwner == null)
-        {
-            return Task.CompletedTask;
-        }
-        if (IsAttacking(Board.EnemyInLane(combatState, Board.LaneOf(Owner))))
-        {
-            return Task.CompletedTask;
-        }
-        foreach (var enemy in Board.Enemies(combatState).Where(IsAttacking).OrderBy(Board.LaneOf))
-        {
-            if (Board.MoveTo(Owner, Board.LaneOf(enemy)))
-            {
-                break;
-            }
-        }
-        return Task.CompletedTask;
-    }
-
-    private static bool IsAttacking(Creature? enemy) => enemy?.Monster?.NextMove.Intents.OfType<AttackIntent>().Any() == true;
-
     public override async Task BeforeSideTurnEnd(PlayerChoiceContext choiceContext, CombatSide side, IEnumerable<Creature> participants)
     {
         if (side != CombatSide.Player || Owner.IsDead || Owner.Monster is not BoardCreature creature)
         {
             return;
         }
-        if (creature.ScaledPower > 0)
-        {
-            foreach (int lane in Sigils.StrikeLanes(Owner).ToList())
-            {
-                await Strike(choiceContext, creature, lane);
-            }
-        }
+        await StrikeNow(choiceContext, endOfTurn: true);
         // Sprinter: after attacking, moves one lane, turning back at the edge or when blocked.
         if (Has(Sigil.Sprinter) && !Owner.IsDead
             && !Board.MoveTo(Owner, Board.LaneOf(Owner) + creature.SprintDirection))
@@ -109,12 +79,33 @@ public sealed class CreaturePower : InscryptionPower
             creature.SprintDirection = -creature.SprintDirection;
             Board.MoveTo(Owner, Board.LaneOf(Owner) + creature.SprintDirection);
         }
+        if (Has(Sigil.Sprinter) && Owner.PetOwner != null)
+        {
+            Guardian.Reposition(Owner.PetOwner);
+        }
     }
 
-    private async Task Strike(PlayerChoiceContext choiceContext, BoardCreature creature, int lane)
+    /// <summary>
+    /// Strike every lane the creature strikes, as at the end of the turn. Cards call it too (Ring the Bell, Death
+    /// Knell); only the end of the turn moves a Sprinter or kills with Touch of Death, so a command card is not a
+    /// repeatable kill.
+    /// </summary>
+    public async Task StrikeNow(PlayerChoiceContext choiceContext, bool endOfTurn = false)
     {
-        // Lanes only reach lanes: a strike into a lane with no enemy hits nothing.
-        if (Board.EnemyInLane(Owner.CombatState, lane) is not { } target)
+        if (Owner.IsDead || Owner.Monster is not BoardCreature creature || creature.ScaledPower <= 0)
+        {
+            return;
+        }
+        foreach (int lane in Sigils.StrikeLanes(Owner).ToList())
+        {
+            await Strike(choiceContext, creature, lane, endOfTurn);
+        }
+    }
+
+    private async Task Strike(PlayerChoiceContext choiceContext, BoardCreature creature, int lane, bool endOfTurn)
+    {
+        // The enemy in that lane, or the nearest one if the lane is empty (Inscryption's scale).
+        if (Board.StrikeTarget(Owner.CombatState, lane) is not { } target)
         {
             return;
         }
@@ -124,7 +115,7 @@ public sealed class CreaturePower : InscryptionPower
         VfxCmd.PlayOnCreatureCenter(target, "vfx/vfx_attack_slash");
         var results = await CreatureCmd.Damage(choiceContext, target, creature.ScaledPower, props, Owner);
         // Touch of Death: destroys what it damages; elites and bosses are made of stone.
-        if (Has(Sigil.TouchOfDeath) && target.IsAlive && Owner.CombatState?.Encounter?.RoomType == RoomType.Monster
+        if (endOfTurn && Has(Sigil.TouchOfDeath) && target.IsAlive && Owner.CombatState?.Encounter?.RoomType == RoomType.Monster
             && results.Any(r => r.Receiver == target && r.UnblockedDamage > 0))
         {
             await CreatureCmd.Kill(target);

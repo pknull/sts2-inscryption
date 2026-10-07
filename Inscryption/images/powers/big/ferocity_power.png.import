@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://15lvmbfgbg5i"
-path="res://.godot/imported/scale.png-6ccb2368476d8f8489ea0110ed742b80.ctex"
+uid="uid://bef4a34kt3dyo"
+path="res://.godot/imported/ferocity_power.png-f953ef03426c5237f1642e50d505abb6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Inscryption/images/relics/scale.png"
-dest_files=["res://.godot/imported/scale.png-6ccb2368476d8f8489ea0110ed742b80.ctex"]
+source_file="res://Inscryption/images/powers/big/ferocity_power.png"
+dest_files=["res://.godot/imported/ferocity_power.png-f953ef03426c5237f1642e50d505abb6.ctex"]
 
 [params]
 

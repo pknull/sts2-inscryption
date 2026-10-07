@@ -84,4 +84,7 @@ public static class Bestiary
         SigilList: [Sigil.Unkillable]);
     public static readonly CreatureStats FrozenOpossum = new(Blood: 0, Power: 0, Health: 5,
         SigilList: [Sigil.FrozenAway], Terrain: true);
+
+    /// <summary>A Fish Hook catch before it is caught; each catch carries its own Power and Health.</summary>
+    public static readonly CreatureStats Hooked = new(Blood: 2, Power: 1, Health: 2);
 }

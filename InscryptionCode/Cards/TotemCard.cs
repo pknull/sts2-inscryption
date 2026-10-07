@@ -45,7 +45,7 @@ public abstract class TotemCard(Tribe tribe) : InscryptionCard(1, CardType.Power
         {
             // Seeded per player, card and how many of this totem the deck already holds, so it is stable on reload.
             int copies = Owner.Deck.Cards.Count(c => c.Id == Id);
-            Inscryption_TotemSigil = (int)new Rng(Owner, Id, (uint)copies).NextItem(Sigils.Modular);
+            Inscryption_TotemSigil = (int)new Rng(Owner, Id, (uint)copies).NextItem(Sigils.ModularFor(tribe));
         }
     }
 

@@ -58,6 +58,13 @@ public static class Sigils
     /// </summary>
     public static readonly Sigil[] Modular = Implemented.Where(s => s != Sigil.Waterborne).ToArray();
 
+    /// <summary>
+    /// The sigils <paramref name="tribe"/>'s Totem can roll. A Squirrel Totem never rolls Unkillable: every dead Squirrel
+    /// would return to the hand, an endless supply of free sacrifices.
+    /// </summary>
+    public static Sigil[] ModularFor(Tribe tribe) =>
+        tribe == Tribe.Squirrel ? Modular.Where(s => s != Sigil.Unkillable).ToArray() : Modular;
+
     public static readonly Tribe[] Tribes = [Tribe.Canine, Tribe.Hooved, Tribe.Reptile, Tribe.Avian, Tribe.Insect, Tribe.Squirrel];
 
     /// <summary>

@@ -12,7 +12,7 @@ namespace Inscryption.InscryptionCode.RestSite;
 /// Inscryption's campfire at Slay the Spire 2's rest sites: warm one creature card for +1 Power or +2 Health (shown
 /// as damage per strike and HP) for
 /// the rest of the run. As in Inscryption each campfire offers one kind of warmth; here it alternates by floor so
-/// it is the same on a reload. Added by the Scale relic; uses up the rest like Smith does.
+/// it is the same on a reload. Added by the Side Deck relic; uses up the rest like Smith does.
 /// </summary>
 public sealed class CampfireRestSiteOption(Player owner) : CustomRestSiteOption(owner)
 {

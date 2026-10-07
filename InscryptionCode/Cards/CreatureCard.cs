@@ -40,20 +40,35 @@ public interface ICreatureCard
 /// <summary>
 /// An Inscryption creature card. It is dragged to a lane (<see cref="LaneDrop"/>): it pays its Blood (sacrificing
 /// creatures already on the board, see <see cref="Sacrifice"/>) or its Bones, then summons
-/// <typeparamref name="TCreature"/> into that lane, or the lowest empty lane if that one is taken. It costs no
-/// energy: Blood and Bones are the costs, as in Inscryption. Upgrading (Smith) lowers that cost by 1; the campfire
-/// raises the creature's stats for the run. Every creature card is a Skill: summoning is not an attack.
+/// <typeparamref name="TCreature"/> into that lane, or the lowest empty lane if that one is taken. Blood and Bones are
+/// the costs, as in Inscryption, plus energy by rarity (<see cref="Balance.EnergyCost"/>) so summoning shares the
+/// turn's energy with Luke's other cards. Upgrading (Smith) lowers the Blood or Bones by 1; the campfire raises the
+/// creature's stats for the run. Every creature card is a Skill: summoning is not an attack.
 /// </summary>
-public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity rarity, CardType type = CardType.Skill)
-    : InscryptionCard(0, type, rarity, TargetType.Self), ICreatureCard where TCreature : BoardCreature
+public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity rarity, CardType type = CardType.Skill,
+    int? energy = null)
+    : InscryptionCard(energy ?? Balance.EnergyCost(rarity), type, rarity, TargetType.Self), ICreatureCard
+    where TCreature : BoardCreature
 {
+    private CreatureStats _stats = stats;
     private int _powerBonus;
     private int _healthBonus;
 
     // Corpse Eater's lane for the next automatic play; -1 when none is pending (combat only, not saved).
     private int _freeLane = -1;
 
-    public CreatureStats Stats => stats;
+    public CreatureStats Stats => _stats;
+
+    /// <summary>A Fish Hook catch takes its stats from the enemy it was; set them on this card and its text.</summary>
+    protected void SetStats(CreatureStats value)
+    {
+        AssertMutable();
+        _stats = value;
+        DynamicVars["Blood"].BaseValue = value.Blood;
+        DynamicVars["Bones"].BaseValue = value.Bones;
+        ((StatVar)DynamicVars["Power"]).Reprint(Power, value.Power * Balance.PowerScale);
+        ((StatVar)DynamicVars["Health"]).Reprint(Health, value.Health * Balance.HealthScale);
+    }
 
     /// <summary>Inscryption Power added at campfires (before <see cref="Balance.PowerScale"/>).</summary>
     [SavedProperty]
@@ -83,17 +98,17 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
 
     private int Blood => DynamicVars["Blood"].IntValue;
     private int Bones => DynamicVars["Bones"].IntValue;
-    private int Power => (stats.Power + _powerBonus) * Balance.PowerScale;
-    private int Health => (stats.Health + _healthBonus) * Balance.HealthScale;
+    private int Power => (_stats.Power + _powerBonus) * Balance.PowerScale;
+    private int Health => (_stats.Health + _healthBonus) * Balance.HealthScale;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
     [
-        new DynamicVar("Blood", stats.Blood),
-        new DynamicVar("Bones", stats.Bones),
+        new DynamicVar("Blood", _stats.Blood),
+        new DynamicVar("Bones", _stats.Bones),
         // Set only on the sacrifice screen's stand-in cards, so the text names the lane being given up.
         new DynamicVar("Lane", 0),
-        new StatVar("Power", Power, stats.Power * Balance.PowerScale),
-        new StatVar("Health", Health, stats.Health * Balance.HealthScale),
+        new StatVar("Power", Power, _stats.Power * Balance.PowerScale),
+        new StatVar("Health", Health, _stats.Health * Balance.HealthScale),
     ];
 
     /// <summary>
@@ -102,9 +117,17 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
     /// </summary>
     private sealed class StatVar(string name, decimal value, decimal printed) : DynamicVar(name, value)
     {
+        private decimal _printed = printed;
+
+        public void Reprint(decimal value, decimal printedValue)
+        {
+            BaseValue = value;
+            _printed = printedValue;
+        }
+
         public override void UpdateCardPreview(CardModel card, CardPreviewMode previewMode, Creature? target, bool runGlobalHooks)
         {
-            EnchantedValue = printed;
+            EnchantedValue = _printed;
             PreviewValue = BaseValue;
         }
     }
@@ -112,16 +135,16 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
     // Corpse Eater acts from the hand, and creatures mostly die on the enemy's turn, after the hand is discarded; in
     // Inscryption the hand persists, so these cards Retain.
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        stats.Sigils.Contains(Sigil.CorpseEater)
-            ? [InscryptionKeywords.Creature, .. Sigils.Keywords(stats), CardKeyword.Retain]
-            : [InscryptionKeywords.Creature, .. Sigils.Keywords(stats)];
+        _stats.Sigils.Contains(Sigil.CorpseEater)
+            ? [InscryptionKeywords.Creature, .. Sigils.Keywords(_stats), CardKeyword.Retain]
+            : [InscryptionKeywords.Creature, .. Sigils.Keywords(_stats)];
 
     // Free creatures have no cost to lower, and Inscryption never upgrades Squirrels.
-    public override int MaxUpgradeLevel => stats.IsFree ? 0 : 1;
+    public override int MaxUpgradeLevel => _stats.IsFree ? 0 : 1;
 
     protected override void OnUpgrade()
     {
-        DynamicVars[stats.Blood > 0 ? "Blood" : "Bones"].UpgradeValueBy(-1);
+        DynamicVars[_stats.Blood > 0 ? "Blood" : "Bones"].UpgradeValueBy(-1);
     }
 
     public void Warm(CampfireBuff buff)
@@ -163,7 +186,7 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
         {
             int lane = _freeLane;
             _freeLane = -1;
-            await Summoning.Summon<TCreature>(choiceContext, Owner, stats, _powerBonus, _healthBonus, this, lane);
+            await Summoning.Summon<TCreature>(choiceContext, Owner, _stats, _powerBonus, _healthBonus, this, lane);
             return;
         }
         // The lane it was dropped on (sent to the other players in co-op); sacrifices may free it.
@@ -174,7 +197,7 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
             await PowerCmd.Apply<BonesPower>(choiceContext, Owner.Creature, -Bones, Owner.Creature, this);
         }
         // Campfire bonuses live on the card; carry them onto this summon.
-        await Summoning.Summon<TCreature>(choiceContext, Owner, stats, _powerBonus, _healthBonus, this, chosenLane);
+        await Summoning.Summon<TCreature>(choiceContext, Owner, _stats, _powerBonus, _healthBonus, this, chosenLane);
     }
 
     /// <summary>
@@ -193,7 +216,7 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
         int empty = Sacrifice.EmptyLanes(Owner);
         if (options.All(c => Sacrifice.Value(c) == 1) && (empty > 0 || !options.Any(Sacrifice.Stays)))
         {
-            return await Pick(choiceContext, options, Blood, SelectionScreenPrompt);
+            return await Sacrifice.Pick(choiceContext, Owner, options, Blood, SelectionScreenPrompt);
         }
         var picked = new List<Creature>();
         int paid = 0;
@@ -203,7 +226,7 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
                 .ToList();
             var prompt = new LocString("cards", "INSCRYPTION-SACRIFICE.selectionScreenPrompt");
             prompt.Add("Blood", Blood - paid);
-            var choice = (await Pick(choiceContext, allowed, 1, prompt)).FirstOrDefault();
+            var choice = (await Sacrifice.Pick(choiceContext, Owner, allowed, 1, prompt)).FirstOrDefault();
             if (choice == null)
             {
                 break;
@@ -212,48 +235,5 @@ public abstract class CreatureCard<TCreature>(CreatureStats stats, CardRarity ra
             paid += Sacrifice.Value(choice);
         }
         return picked;
-    }
-
-    /// <summary>
-    /// The card shown for a creature on the sacrifice screen: it carries its summoning card's state and names its lane,
-    /// so two Stoats can be told apart.
-    /// </summary>
-    private CardModel StandIn(ICombatState combatState, Creature creature)
-    {
-        var board = (BoardCreature)creature.Monster!;
-        var card = combatState.CreateCard(board.Card, Owner);
-        if (board.SourceCard != null && card is ICreatureCard standIn)
-        {
-            standIn.CopyStateFrom(board.SourceCard);
-        }
-        card.DynamicVars["Lane"].BaseValue = Board.LaneOf(creature) + 1;
-        return card;
-    }
-
-    /// <summary>Show <paramref name="creatures"/> as their cards, in lane order, and return the ones picked.</summary>
-    private async Task<List<Creature>> Pick(PlayerChoiceContext choiceContext, List<Creature> creatures, int count,
-        LocString prompt)
-    {
-        var combatState = Owner.Creature.CombatState;
-        if (combatState == null || creatures.Count == 0)
-        {
-            return [];
-        }
-        var cards = creatures.Select(c => StandIn(combatState, c)).ToList();
-        try
-        {
-            var picked = await CardSelectCmd.FromSimpleGrid(choiceContext, cards, Owner,
-                new CardSelectorPrefs(prompt, Math.Min(count, cards.Count)));
-            // By reference: two Stoats are distinct creatures even if their cards compare equal.
-            return picked.Select(card => creatures[cards.FindIndex(o => ReferenceEquals(o, card))]).ToList();
-        }
-        finally
-        {
-            // The stand-in cards were only for display; keep them out of the combat's card list.
-            foreach (var card in cards)
-            {
-                combatState.RemoveCard(card);
-            }
-        }
     }
 }

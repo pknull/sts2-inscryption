@@ -1,3 +1,4 @@
+using Inscryption.InscryptionCode.Cards;
 using Inscryption.InscryptionCode.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -19,7 +20,16 @@ public static class Summoning
         CreatureStats stats, int powerBonus = 0, int healthBonus = 0, CardModel? source = null, int lane = -1)
         where TCreature : BoardCreature
     {
+        // A Fish Hook catch stands in its photograph, which its visuals load as the pet is made.
+        if (source is HookedCard catchCard)
+        {
+            HookedCreature.PendingPhoto = catchCard.Inscryption_HookedPhoto;
+        }
         var creature = await PlayerCmd.AddPet<TCreature>(owner);
+        if (creature.Monster is HookedCreature hooked && source is HookedCard caught)
+        {
+            hooked.Catch(caught);
+        }
         // Take the lowest empty lane now, in game logic, rather than whenever the UI first looks.
         Board.LaneOf(creature);
         if (lane >= 0 && Board.LaneOf(creature) != lane)
@@ -40,6 +50,7 @@ public static class Summoning
         }
         await PowerCmd.Apply<CreaturePower>(choiceContext, creature, 1m, owner.Creature, source);
         board.ShowIntent();
+        Guardian.Reposition(owner);
         return creature;
     }
 }

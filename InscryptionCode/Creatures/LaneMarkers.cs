@@ -200,12 +200,15 @@ internal static class LaneMarkers
         _linked?.ShowSingleSelectReticle();
     }
 
-    /// <summary>Who sits across the lane: your creature's enemy, or the enemy's blocker (you if the lane is empty).</summary>
+    /// <summary>
+    /// Who sits across the lane: the enemy your creature strikes (the nearest if its lane is empty), or the enemy's
+    /// blocker (you if the lane is empty).
+    /// </summary>
     private static Creature? Partner(Creature hovered, ICombatState state, Player me)
     {
         if (Board.Shown.Creatures(me).Contains(hovered))
         {
-            return Board.Shown.EnemyInLane(state, Board.Shown.LaneOf(hovered));
+            return Board.Shown.StrikeTarget(state, Board.Shown.LaneOf(hovered));
         }
         if (Board.Shown.Enemies(state).Contains(hovered))
         {

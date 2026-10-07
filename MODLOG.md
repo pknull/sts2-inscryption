@@ -622,6 +622,59 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   Squirrels. The Keeper keeps it tight: rewards and the shop loosen it over a run.
 - Released as v0.2.1 (pre-release).
 
+### v0.3 direction: Side Deck back, x2 stats, energy costs, the Defect model (2026-10-06/07, issues #12-#16)
+
+- A playtester's report: an Attack-generating card froze the game with cards stacking mid-screen; creatures in lanes
+  without an enemy did nothing all fight (#7), so they cut creatures and won with upgraded Strikes and lifesteal
+  ("a vampire rather than an animal handler"). The Keeper's calls: Guardian moves to face an unopposed enemy (#13);
+  the Side Deck returns and the Scale's lifesteal goes, 5 Strike / 5 Defend (#14); creature stats x2 power / x2
+  health with energy by rarity (Common 0, Uncommon 1, Rare 2) on top of Blood/Bones (#15); creatures should work like
+  the Defect's orbs (#16); a Fish Hook card; then "finish the rest with a best idea and build it".
+- #12, verified: baseline v0.2.1 on a throwaway off-Steam account (`--force-steam off --clientId 4242`, saves under
+  `default/4242`) with `power CALAMITY_POWER 1 0` and a Strike crashed the game outright. Cause:
+  `CardFactory.GetForCombat` makes `CreateCard(null)` when the filtered pool is empty, and Luke had no non-Basic
+  Attack. Fix: `Patches/EmptyCardGeneration` returns no cards for an empty pool; the root is gone too (new Attacks):
+  after the fix Calamity's Strike resolved and added a Ring the Bell.
+- #7 reversed (agent's call, delegated): a strike into an empty lane hits the nearest enemy by lane, ties to the
+  lower lane (`Board.StrikeTarget`), Inscryption's scale in StS terms. Creatures now cost energy, so an idle one would
+  be a dead card. Creature and keyword text updated.
+- Survey of the five characters (decompile, by agents): 87-88 card pools, about half touching the signature
+  mechanic; Commons are about 12 Attacks + 8 Skills with the mechanic as a rider (Ball Lightning, Solar Strike,
+  Cloak and Dagger, Pull Aggro); one scaling stat (Focus, Calcify); after-hook payoffs (Feel No Pain, Black Hole);
+  evoke on demand (Dualcast, Multicast). Strength applies only when the dealer holds it and the hit is powered, so
+  Luke's Strength never reaches creature strikes; Ferocity is that stat instead.
+- New cards (16, placeholder art from `tools/placeholder_art.py`): Commons Skinning Knife (8 + 1 Bones), Snare
+  (7 + Squirrel), Pack Hunt (5 per creature), Squirrel Bottle (6 Block + Squirrel), Hoggy Bank (0, Exhaust, 4 Bones),
+  Hunting Horn (0, Exhaust, +2 per strike this turn), Wolf Pelt (7 Block + 1 Bones), Magpie's Lens (creature card
+  from the draw pile + draw 1); Uncommons Ring the Bell (creatures strike now; upgrade Retain), Ritual Knife
+  (sacrifice one, draw 2), Bared Fangs (1 Ferocity), The Altar (3 Block per sacrifice), Boneyard (3 to all on Bones
+  gained); Rares Death Knell (X: creatures strike X times, then perish), Fish Hook (2, Exhaust). An adversarial
+  review agent cut the first draft's numbers (Ferocity 2 -> 1, Horn 4 -> 2, Altar 5 -> 3; Bell Common -> Uncommon;
+  Knell keeps its creatures -> they perish) and renamed The Hunt (a vanilla card) and Trapper's Knife.
+- Rules: Touch of Death kills only on the end-of-turn strike (a command card is not a repeatable kill); a Squirrel
+  Totem never rolls Unkillable (endless free sacrifices); The Altar hooks `Sacrifice.Perform`, so card and Ritual
+  Knife sacrifices both count; the sacrifice picker moved from `CreatureCard` to `Sacrifice.Pick`.
+- Fish Hook: targets only a primary enemy at half HP or less in a normal fight (`Patches/FishHookTargets` on
+  `CardModel.IsValidTarget`). Power = ceil(intent hit / 4) clamped 1-4 from `DamageCalc` (raw, the same on every
+  machine), Health = half its HP clamped 2-6; a `HookedCard` (token, 1 energy, 2 Blood) saved with the monster id,
+  stats and photo key. `HookPhoto` hides the HP bar and intents, waits two frames, grabs the enemy's hitbox region
+  from the viewport and saves `user://inscryption/hooked/<seed>-<floor>-<monster>-<n>.res` (portrait) and a
+  `_sprite.res` white print the hooked creature stands as. The enemy is killed, not escaped, so a hooked last enemy
+  ends the fight with full gold.
+- Verified in game (throwaway account, agent driving): Side Deck relic and text, deck 5/5 with Strike 6, Squirrel
+  0/2 Exhaust + Ethereal (six exhausted after a turn), Mantis God 2 energy at 2/2, Bloodhound 1 energy; Ferocity in
+  intents (2x3 -> 3x3); Ring the Bell; Pack Hunt; Hoggy Bank 4 Bones + Boneyard 3 to all; Skinning Knife; Ritual
+  Knife (Altar 3 Block, Bones, Boneyard, draw 2); Hunting Horn +2 then gone next turn; Snare; Squirrel Bottle; Wolf
+  Pelt; Magpie's Lens; Guardian (Bloodhound dropped in lane 3 moved to face the lane-1 enemy); Death Knell strikes and
+  perishes (Squirrel died, +1 Bones); Fish Hook greyed out at full HP, hooked at half, "Hooked Leaf Slime (S)" and
+  "Hooked Nibbit" in the deck with their photos, survived save and reload, catch stood in its lane as its print.
+  No exceptions in either session's log.
+- Not verified: co-op (Fish Hook photos are taken per machine under one key; stats come from raw values); the
+  empty-pool guard itself (Luke's pool now has Attacks); balance over a real run.
+- Gotchas: the dev console drops characters when several long commands are typed in one opening (it ran
+  "card INSC_KNIFE"); one command per opening is reliable. `energy` adds and refuses negatives. A game killed with
+  SIGTERM after Save and Quit hung on an X error; SIGKILL closed it (the save had landed).
+
 ### Gotchas found in game
 
 1. Mod-loading popup: choosing "load mods" saves `PlayerAgreedToModLoading` and calls `NGame.Quit()`
@@ -640,7 +693,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
 
 ## Next
 
-- Play a run with HitLog live and split each elite and boss fight's damage: blocker HP, Luke's Block, open lanes.
-- Then a lever for Act 2 hits (creature HP by act, or cheaper creature HP); offense if fights drag.
-- Luke has no non-Basic Attacks now: Inscryption-flavoured non-creature cards; sigil batch 3.
-- Enemy stats count Luke's creatures as opponents (harmless, unfixed); field note via `um kb` (Keeper's OK first).
+- The Keeper's playtest of v0.3 (local build deployed; Inscryption.json still says v0.2.1 until a release).
+- Art for the 16 new cards and 4 powers (fal on the Keeper's go-ahead; placeholders now).
+- Co-op check of the new cards and the Fish Hook.
+- fal_manifest.jsonl is 77 MB; field note via `um kb` (Keeper's OK first).

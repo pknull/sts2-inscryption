@@ -1,8 +1,14 @@
 using System.Runtime.CompilerServices;
 using Inscryption.InscryptionCode.Cards;
+using Inscryption.InscryptionCode.Powers;
+using MegaCrit.Sts2.Core.CardSelection;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Models;
 
 namespace Inscryption.InscryptionCode.Creatures;
 
@@ -66,11 +72,18 @@ public static class Sacrifice
         return paid + rest.Sum(Value) >= blood && emptyLanes + freed + rest.Count(c => !Stays(c)) > 0;
     }
 
-    /// <summary>Kill the chosen creatures, except those with Many Lives (the Cat counts the life it spent).</summary>
+    /// <summary>
+    /// Kill the chosen creatures, except those with Many Lives (the Cat counts the life it spent). Each one counts as
+    /// sacrificed for The Altar, Many Lives included.
+    /// </summary>
     public static async Task Perform(IEnumerable<Creature> victims)
     {
         foreach (var victim in victims)
         {
+            if (victim.PetOwner?.Creature.GetPower<AltarPower>() is { } altar)
+            {
+                await altar.AfterSacrifice();
+            }
             if (Stays(victim))
             {
                 // The Cat's lives: shown on this combat's card, kept (and spent for good) on the deck's.
@@ -86,6 +99,53 @@ public static class Sacrifice
             }
             Sacrificed.AddOrUpdate(victim, true);
             await CreatureCmd.Kill(victim);
+        }
+    }
+
+    /// <summary>The player picks one creature to sacrifice (Ritual Knife); null if there is none.</summary>
+    public static async Task<Creature?> ChooseOne(PlayerChoiceContext choiceContext, Player owner, LocString prompt) =>
+        (await Pick(choiceContext, owner, Candidates(owner), 1, prompt)).FirstOrDefault();
+
+    /// <summary>
+    /// The card shown for a creature on the sacrifice screen: it carries its summoning card's state and names its lane,
+    /// so two Stoats can be told apart.
+    /// </summary>
+    private static CardModel StandIn(ICombatState combatState, Player owner, Creature creature)
+    {
+        var board = (BoardCreature)creature.Monster!;
+        var card = combatState.CreateCard(board.Card, owner);
+        if (board.SourceCard != null && card is ICreatureCard standIn)
+        {
+            standIn.CopyStateFrom(board.SourceCard);
+        }
+        card.DynamicVars["Lane"].BaseValue = Board.LaneOf(creature) + 1;
+        return card;
+    }
+
+    /// <summary>Show <paramref name="creatures"/> as their cards, in lane order, and return the ones picked.</summary>
+    public static async Task<List<Creature>> Pick(PlayerChoiceContext choiceContext, Player owner, List<Creature> creatures,
+        int count, LocString prompt)
+    {
+        var combatState = owner.Creature.CombatState;
+        if (combatState == null || creatures.Count == 0)
+        {
+            return [];
+        }
+        var cards = creatures.Select(c => StandIn(combatState, owner, c)).ToList();
+        try
+        {
+            var picked = await CardSelectCmd.FromSimpleGrid(choiceContext, cards, owner,
+                new CardSelectorPrefs(prompt, Math.Min(count, cards.Count)));
+            // By reference: two Stoats are distinct creatures even if their cards compare equal.
+            return picked.Select(card => creatures[cards.FindIndex(o => ReferenceEquals(o, card))]).ToList();
+        }
+        finally
+        {
+            // The stand-in cards were only for display; keep them out of the combat's card list.
+            foreach (var card in cards)
+            {
+                combatState.RemoveCard(card);
+            }
         }
     }
 }

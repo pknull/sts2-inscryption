@@ -2,6 +2,7 @@ using BaseLib.Abstracts;
 using BaseLib.Extensions;
 using BaseLib.Utils.NodeFactories;
 using Inscryption.InscryptionCode.Extensions;
+using Inscryption.InscryptionCode.Powers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.MonsterMoves.Intents;
 using MegaCrit.Sts2.Core.MonsterMoves.MonsterMoveStateMachine;
@@ -32,8 +33,18 @@ public abstract class BoardCreature : CustomMonsterModel
     /// <summary>Sprinter's direction: +1 moves towards higher lanes, -1 towards lower.</summary>
     public int SprintDirection { get; set; } = 1;
 
-    /// <summary>Damage per strike: printed Power, campfire Power, +1 for each adjacent Leader; scaled.</summary>
-    public int ScaledPower => (Stats.Power + BonusPower + AdjacentLeaders()) * Balance.PowerScale;
+    /// <summary>
+    /// Damage per strike: printed Power, campfire Power, +1 for each adjacent Leader; scaled; then the owner's
+    /// Ferocity. A creature with no power doesn't strike, and Ferocity doesn't change that.
+    /// </summary>
+    public int ScaledPower
+    {
+        get
+        {
+            int power = (Stats.Power + BonusPower + AdjacentLeaders()) * Balance.PowerScale;
+            return power > 0 ? power + FerocityPower.Of(Creature?.PetOwner) : power;
+        }
+    }
 
     private int AdjacentLeaders()
     {

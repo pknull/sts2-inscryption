@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://qeg7cd1aedj1"
-path="res://.godot/imported/scale_outline.png-f96fc70a19aca8516e6604b58754231d.ctex"
+uid="uid://dlttp1t10lpsg"
+path="res://.godot/imported/squirrel_bottle.png-15a8ebb8a8d4d23787fc8ecc0aef23e6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Inscryption/images/relics/scale_outline.png"
-dest_files=["res://.godot/imported/scale_outline.png-f96fc70a19aca8516e6604b58754231d.ctex"]
+source_file="res://Inscryption/images/card_portraits/squirrel_bottle.png"
+dest_files=["res://.godot/imported/squirrel_bottle.png-15a8ebb8a8d4d23787fc8ecc0aef23e6.ctex"]
 
 [params]
 

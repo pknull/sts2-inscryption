@@ -60,6 +60,9 @@ public static class Board
 
         public static Creature? EnemyInLane(ICombatState? combatState, int lane) =>
             lane < 0 ? null : LivingEnemies(combatState).FirstOrDefault(e => LaneOrNone(e) == lane);
+
+        public static Creature? StrikeTarget(ICombatState? combatState, int lane) =>
+            Nearest(LivingEnemies(combatState), lane);
     }
 
     /// <summary>The creature's lane (0-3), or -1 if it has none.</summary>
@@ -82,6 +85,25 @@ public static class Board
     public static Creature? EnemyInLane(ICombatState? combatState, int lane) =>
         lane < 0 ? null : Enemies(combatState).FirstOrDefault(e => LaneOrNone(e) == lane);
 
+    /// <summary>
+    /// What a creature's strike into <paramref name="lane"/> hits: the enemy in that lane, or, if it is empty, the
+    /// enemy nearest to it (the lower lane on a tie). Inscryption sends a strike into an empty lane through to the
+    /// opponent's scale; here the enemies are the opponent (Keeper, 2026-10-06, reversing #7).
+    /// </summary>
+    public static Creature? StrikeTarget(ICombatState? combatState, int lane) => Nearest(Enemies(combatState), lane);
+
+    private static Creature? Nearest(List<Creature> enemies, int lane)
+    {
+        if (lane < 0)
+        {
+            return null;
+        }
+        var laned = enemies.Where(e => LaneOrNone(e) >= 0).ToList();
+        return laned.Count == 0
+            ? enemies.FirstOrDefault()
+            : laned.OrderBy(e => Math.Abs(LaneOrNone(e) - lane)).ThenBy(LaneOrNone).First();
+    }
+
     /// <summary>Move one of the player's creatures to an empty lane (Sprinter, Guardian, Burrower).</summary>
     public static bool MoveTo(Creature creature, int lane)
     {
@@ -92,6 +114,19 @@ public static class Board
         Lanes.AddOrUpdate(creature, new StrongBox<int>(lane));
         BoardLayout.Refresh();
         return true;
+    }
+
+    /// <summary>Redraw the player's creatures' intents (their damage per strike changed).</summary>
+    public static void RefreshIntents(Player? player)
+    {
+        if (player == null)
+        {
+            return;
+        }
+        foreach (var creature in Shown.Creatures(player))
+        {
+            (creature.Monster as BoardCreature)?.ShowIntent();
+        }
     }
 
     private static int LaneOrNone(Creature creature) => Lanes.TryGetValue(creature, out var lane) ? lane.Value : -1;

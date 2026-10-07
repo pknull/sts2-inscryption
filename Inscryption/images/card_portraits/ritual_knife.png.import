@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cekdjlaqla85t"
-path="res://.godot/imported/scale.png-289ed2afcf7a6fbc18d484a9a08be85a.ctex"
+uid="uid://cjewdbekl7sxw"
+path="res://.godot/imported/ritual_knife.png-6e1213f7d42748498037da10ef295b38.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Inscryption/images/relics/big/scale.png"
-dest_files=["res://.godot/imported/scale.png-289ed2afcf7a6fbc18d484a9a08be85a.ctex"]
+source_file="res://Inscryption/images/card_portraits/ritual_knife.png"
+dest_files=["res://.godot/imported/ritual_knife.png-6e1213f7d42748498037da10ef295b38.ctex"]
 
 [params]
 

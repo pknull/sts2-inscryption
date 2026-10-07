@@ -31,21 +31,27 @@ Ironclad and Luke unlocked.
 
 ## How Luke plays
 
-- **Starting deck:** 4 Strike, 4 Defend, 2 Squirrel. More creatures join through card rewards, like any other
-  character's cards; Squirrels, the free sacrifices, are Common cards you can pick up or buy.
-- **The Scale (starting relic):** Luke heals half the HP that he and his creatures take from enemies (Block and
-  overkill don't count).
-- **Creature cards are Skills and cost no energy.** They cost a sacrifice (creatures already on your board) or
-  Bones (gained whenever one of your creatures dies).
+- **Starting deck:** 5 Strike, 5 Defend. More creatures join through card rewards, like any other character's
+  cards.
+- **The Side Deck (starting relic):** a Squirrel, the free sacrifice, comes into your hand at the start of each turn
+  (ten per combat). It is Ethereal: play it that turn or lose it.
+- **Creature cards are Skills.** They cost a sacrifice (creatures already on your board) or Bones (gained whenever
+  one of your creatures dies), plus energy by rarity: Commons nothing, Uncommons 1, Rares 2.
 - **Lanes:** drag a creature card to a lane (an empty slot, or the enemy facing it) to summon it there. If that
   lane is taken, it goes to the lowest empty lane.
 - **Blocking:** a creature takes the hits of the enemy in its lane; damage beyond its HP goes through to Luke, then
   his Block. An enemy facing an empty lane hits Luke directly. At the end of your turn, each creature strikes the
-  enemy in its lane; a lane with no enemy is not struck.
+  enemy in its lane, or the nearest enemy if its lane is empty.
+- **Luke's cards work the board:** Attacks and Skills that also bring Squirrels or Bones (Snare, Squirrel Bottle,
+  Skinning Knife, Wolf Pelt), cards that make your creatures strike now (Ring the Bell, Death Knell), Ferocity
+  (Bared Fangs, Hunting Horn) to raise every creature's damage, and payoffs for sacrifices and Bones (The Altar,
+  Boneyard, Ritual Knife).
+- **Fish Hook (Rare):** hook a normal enemy at half HP or less. It changes sides and joins your deck as a creature
+  card, with a photograph of it as the card art.
 - **Sigils** from Inscryption (Airborne, Bifurcated Strike, Many Lives, Unkillable and more) are on the cards and
   explained in their tooltips. **Totems** grant a sigil to a whole tribe for the combat.
 - **Cockroaches breed:** every Cockroach that dies adds a new Cockroach curse to your deck for good.
-- **Rest sites:** Luke's Campfire option makes one creature card stronger (+3 damage per strike or +10 HP).
+- **Rest sites:** Luke's Campfire option makes one creature card stronger (+2 damage per strike or +4 HP).
 
 ## Reporting a bug
 

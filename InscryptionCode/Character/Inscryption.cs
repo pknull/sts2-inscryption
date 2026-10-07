@@ -20,23 +20,23 @@ public class Inscryption : PlaceholderCharacterModel
     public override CharacterGender Gender => CharacterGender.Masculine;
     public override int StartingHp => 70;
     
-    // Squirrels come only from the deck: two to start.
+    // Squirrels come from the Side Deck, one each turn.
     public override IEnumerable<CardModel> StartingDeck => [
         ModelDb.Card<Strike>(),
         ModelDb.Card<Strike>(),
         ModelDb.Card<Strike>(),
         ModelDb.Card<Strike>(),
+        ModelDb.Card<Strike>(),
         ModelDb.Card<Defend>(),
         ModelDb.Card<Defend>(),
         ModelDb.Card<Defend>(),
         ModelDb.Card<Defend>(),
-        ModelDb.Card<Squirrel>(),
-        ModelDb.Card<Squirrel>(),
+        ModelDb.Card<Defend>(),
     ];
 
     public override IReadOnlyList<RelicModel> StartingRelics =>
     [
-        ModelDb.Relic<Scale>()
+        ModelDb.Relic<SideDeck>()
     ];
     
     public override CardPoolModel CardPool => ModelDb.CardPool<InscryptionCardPool>();
