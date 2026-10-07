@@ -194,6 +194,46 @@ def icons() -> None:
     print("icons: bones_power, creature_power (64 + 256), side_deck relic (94 + outline + 256), campfire rest option")
 
 
+# v0.3 board cards (Work/tools/gen_batch3.sh): card id -> source image stem. Portraits only.
+CARDS = ["skinning_knife", "snare", "pack_hunt", "ring_the_bell", "death_knell", "squirrel_bottle", "hoggy_bank",
+         "hunting_horn", "wolf_pelt", "magpies_lens", "ritual_knife", "fish_hook", "bared_fangs", "the_altar",
+         "boneyard"]
+
+# Power id -> icon cutout stem.
+POWER_ICONS = {"ferocity_power": "icon_ferocity", "hunting_horn_power": "icon_hunting_horn",
+               "altar_power": "icon_altar", "boneyard_power": "icon_boneyard"}
+
+
+def cards() -> None:
+    for card in CARDS:
+        art = Image.open(GEN / f"{card}_flat.png").convert("RGB")
+        cover(art, (1000, 760)).save(IMAGES / "card_portraits" / "big" / f"{card}.png")
+        cover(art, (250, 190)).save(IMAGES / "card_portraits" / f"{card}.png")
+    print(f"cards: {len(CARDS)} portraits")
+
+
+def powers() -> None:
+    for power_id, source in POWER_ICONS.items():
+        cut = Image.open(GEN / f"{source}_cut.png").convert("RGBA")
+        icon(cut, 64).save(IMAGES / "powers" / f"{power_id}.png")
+        icon(cut, 256).save(IMAGES / "powers" / "big" / f"{power_id}.png")
+    print(f"powers: {len(POWER_ICONS)} icons (64 + 256)")
+
+
+def blood() -> None:
+    """Luke's energy as Blood: card cost icon, text icon, and the drop layer of the energy counter (the backing disc
+    and ring layers come from placeholder_art.py)."""
+    cut = Image.open(GEN / "icon_blood_cut.png").convert("RGBA")
+    charui = IMAGES / "charui"
+    icon(cut, 74, margin=0.04).save(charui / "big_energy.png")
+    icon(cut, 24, margin=0.02).save(charui / "text_energy.png")
+    layer = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
+    drop = icon(cut, 92, margin=0.0)
+    layer.paste(drop, (18, 16), drop)
+    layer.save(charui / "energy_counter_4.png")
+    print("blood: cost icon 74, text icon 24, counter drop layer")
+
+
 def main() -> None:
     (IMAGES / "card_portraits" / "big").mkdir(parents=True, exist_ok=True)
     (IMAGES / "creatures").mkdir(parents=True, exist_ok=True)
@@ -208,6 +248,9 @@ def main() -> None:
     icons()
     totems()
     basics()
+    cards()
+    powers()
+    blood()
 
 
 if __name__ == "__main__":

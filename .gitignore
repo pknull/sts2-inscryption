@@ -29,3 +29,6 @@ assets/gen/*
 !assets/gen/luke_rest_nolog.png
 !assets/gen/luke_rest_nolog_cut.png
 !assets/gen/totem_*.png
+
+# Python bytecode from running tools/*.py
+__pycache__/

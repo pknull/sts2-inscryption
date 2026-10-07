@@ -127,16 +127,15 @@ def counter_layer(layer: int) -> Image.Image:
 def blood() -> None:
     """Luke's energy shown as Blood: the card cost icon, the icon in card text and the energy counter."""
     ui = IMAGES / "charui"
-    drop(74).save(ui / "big_energy.png")
-    drop(24).save(ui / "text_energy.png")
-    for layer in range(1, 6):
-        counter_layer(layer).save(ui / f"energy_counter_{layer}.png")
+    for name, img in [("big_energy", lambda: drop(74)), ("text_energy", lambda: drop(24))] + [
+            (f"energy_counter_{n}", lambda n=n: counter_layer(n)) for n in range(1, 6)]:
+        if not (ui / f"{name}.png").exists():
+            img().save(ui / f"{name}.png")
 
 
 def main() -> None:
     made = []
     blood()
-    made.append("blood (energy icons and counter)")
     sprite = IMAGES / "creatures" / "hooked_creature.png"
     if not sprite.exists():
         print_photo().save(sprite)

@@ -697,6 +697,22 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
   Bloodhound 9/18, Mantis God 5/16, Urayuli 27/40 on the cards; a summoned Stoat 12/12 with a 3 intent, Squirrel
   4/4. No exceptions.
 
+### v0.3.0 art and release (2026-10-07, Keeper's go-ahead)
+
+- `Work/tools/gen_batch3.sh`: 15 card portraits and 5 icons (Ferocity, Hunting Horn, The Altar, Boneyard, Blood)
+  as `um fal edit --ref stoat_flat_probe.png` (nano-banana-2 edit, 1K, $0.08 each), icons cut out with birefnet.
+  One take each, no rerolls: $1.60 plus cutouts; fal total about $6.70. The Hooked card's fallback portrait stays a
+  placeholder (the catch's photograph replaces it).
+- `make_art.py` gained `cards()`, `powers()` and `blood()` (cost icon 74, text icon 24, counter drop layer; the
+  counter's backing and ring layers stay from `placeholder_art.py`, which now never overwrites existing files).
+- `assets/gen/fal_manifest.jsonl` had reached 99.6 MB (GitHub refuses files over 100 MiB): its entries embedded
+  every reference image as base64, mostly the stoat probe 73 times. Each embedded image is now a stub,
+  `sha256:<digest> (<bytes> bytes) = assets/gen/<file>`; all 82 matched a file here. 95 KB; the full data stays
+  in history, so no rewrite was needed. um still embeds new inputs: run `tools/slim_manifest.py` after a batch.
+- Verified in game: portraits, power icons and the blood counter. Released as v0.3.0 (pre-release, same four-file
+  zip). `um publish check`: 0 failures; warnings for the pck size (35 MB, own assets only, no Work/, Memory/,
+  assets/ entries) and no README in the zip, as in earlier releases.
+
 ### Gotchas found in game
 
 1. Mod-loading popup: choosing "load mods" saves `PlayerAgreedToModLoading` and calls `NGame.Quit()`
@@ -715,7 +731,7 @@ Method: Keeper clicks; agent reads godot.log and takes X11 window screenshots (`
 
 ## Next
 
-- The Keeper's playtest of v0.3 (local build deployed; Inscryption.json still says v0.2.1 until a release).
-- Art for the 16 new cards and 4 powers (fal on the Keeper's go-ahead; placeholders now).
-- Co-op check of the new cards and the Fish Hook.
-- fal_manifest.jsonl is 77 MB; field note via `um kb` (Keeper's OK first).
+- Playtest of v0.3.0 by the Keeper's tester; read back godot.log and run history (Commons first: free Squirrels buy
+  the most at the new prices).
+- Co-op check of the new cards and the Fish Hook (photos are per machine under one key).
+- Field note via `um kb` (Keeper's OK first).
